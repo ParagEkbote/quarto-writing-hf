@@ -1,0 +1,11 @@
+[tool.bentoml.build]
+service = "service:MyService"
+description = "A blazing-fast inference stack for Flux.1-dev with dynamic LoRA hotswapping."
+
+[tool.bentoml.build.labels]
+owner = "Parag Ekbote"
+stage = "not-ready"
+
+[tool.bentoml.build.args]
+model_name = black-forest-labs/FLUX.1-dev
+gpu = 1
