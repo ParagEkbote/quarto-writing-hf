@@ -10,6 +10,45 @@ stage = "not-ready"
 model_name = black-forest-labs/FLUX.1-dev
 gpu = 1
 
+[tool.bentoml.build.python]
+
+pip_args = "--pre -U --force-reinstall"
+
+[tool.bentoml.build.docker]
+distro = "debian"
+python_version = "3.11"
+system_packages = ["libblas-dev", "liblapack-dev", "gfortran"]
+
+[tool.coverage.run]  
+source = ["."]
+include = ["skorch/*"]
+omit = [
+    "skorch/tests/*",
+    "skorch/_version.py",
+]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = false
+
+[tool.flake8]
+max-line-length = 88
+docstring-convention = "numpy"
+ignore = "D204,D401"
+
+[project.optional-dependencies]
+dev = [
+    "pylint",
+    "flake8",
+    "future>=0.17.1",
+]
+
+test = [
+    "pytest>=3.4",
+    "pytest-cov",
+    "flaky",
+]
+
 [tool.pytest.ini_options]
 log_cli = true
 log_cli_level = "INFO"
