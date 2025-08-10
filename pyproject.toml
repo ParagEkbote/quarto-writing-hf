@@ -9,3 +9,20 @@ stage = "not-ready"
 [tool.bentoml.build.args]
 model_name = black-forest-labs/FLUX.1-dev
 gpu = 1
+
+[tool.pytest.ini_options]
+log_cli = true
+log_cli_level = "INFO"
+
+addopts = [
+    "--cov=src/",
+    "--cov-report=term-missing",
+    "--cov-config=pyproject.toml",
+    "--durations=0"
+]
+
+python_files = "test_*.py"
+
+testpaths = [
+    "tests/",
+]
