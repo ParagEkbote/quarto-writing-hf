@@ -11,6 +11,44 @@ from diffusers.quantizers import PipelineQuantizationConfig
 from huggingface_hub import login
 from PIL import Image
 
+import time
+import torch
+import psutil
+from contextlib import contextmanager
+
+@contextmanager
+def vram_monitor(tag="Run"):
+    """
+    Context manager to log VRAM & CPU RAM usage around a code block.
+    """
+    torch.cuda.synchronize()
+    start_time = time.time()
+
+    # Get initial memory stats
+    start_vram = torch.cuda.memory_allocated() / (1024 ** 2)
+    start_vram_reserved = torch.cuda.memory_reserved() / (1024 ** 2)
+    start_cpu_mem = psutil.Process().memory_info().rss / (1024 ** 2)
+
+    yield  # Execute the code inside the context
+
+    torch.cuda.synchronize()
+    end_time = time.time()
+
+    # Get final memory stats
+    end_vram = torch.cuda.memory_allocated() / (1024 ** 2)
+    end_vram_reserved = torch.cuda.memory_reserved() / (1024 ** 2)
+    peak_vram = torch.cuda.max_memory_allocated() / (1024 ** 2)
+    end_cpu_mem = psutil.Process().memory_info().rss / (1024 ** 2)
+
+    print(f"\n[{tag}] Performance Report:")
+    print(f"Elapsed time: {end_time - start_time:.2f} sec")
+    print(f"VRAM Allocated: {start_vram:.2f} MB → {end_vram:.2f} MB")
+    print(f"VRAM Reserved:  {start_vram_reserved:.2f} MB → {end_vram_reserved:.2f} MB")
+    print(f"Peak VRAM:      {peak_vram:.2f} MB")
+    print(f"CPU RAM:        {start_cpu_mem:.2f} MB → {end_cpu_mem:.2f} MB\n")
+
+    torch.cuda.reset_peak_memory_stats()
+    
 @bentoml.service(
     name="diffusers-fast-lora",
     traffic={"timeout": 300},
@@ -85,12 +123,13 @@ class FluxLoRAService:
         self.pipe.vae = torch.compile(self.pipe.vae, fullgraph=False, mode="reduce-overhead")
 
         with torch.no_grad():
-            image = self.pipe(
-                prompt=prompt,
-                height=1024,
-                width=1024,
-                guidance_scale=3.5,
-                num_inference_steps=28,
-                max_sequence_length=512,
-            ).images[0]
+            with vram_monitor(tag="Image Generation"):
+                image = self.pipe(
+                    prompt=prompt,
+                    height=1024,
+                    width=1024,
+                    guidance_scale=3.5,
+                    num_inference_steps=28,
+                    max_sequence_length=512,
+                ).images[0]
             return save_image(image)
