@@ -63,9 +63,10 @@ ignore = "D204,D401"
 
 [project.optional-dependencies]
 dev = [
-    "pylint",
+    "isort",
     "flake8",
-    "future>=0.17.1",
+    "black",
+    "pre-commit"
 ]
 
 test = [
