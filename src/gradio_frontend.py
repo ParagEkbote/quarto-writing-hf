@@ -24,10 +24,30 @@ def generate_image(trigger_word, prompt):
 
 # Build Gradio UI
 with gr.Blocks() as demo:
-    gr.Markdown("## 🎨 Flux Fast LoRA:")
+    gr.Markdown(
+    """
+    <p style="font-size:20px">
+    🎨 Flux Fast LoRA-Hotswap:
+    This application uses **torch.compile**, **BitsAndBytes**, and **PEFT LoRA** to enable the 
+    Flux.1 [dev] model for blazing fast text-to-image generation.  
+
+    
+    **Base model:** [black-forest-labs/FLUX.1-dev](https://huggingface.co/black-forest-labs/FLUX.1-dev)  
+    **LoRA 1:** [data-is-better-together/open-image-preferences-v1-flux-dev-lora](https://huggingface.co/data-is-better-together/open-image-preferences-v1-flux-dev-lora)  
+    **LoRA 2:** [aleksa-codes/flux-ghibsky-illustration](https://huggingface.co/aleksa-codes/flux-ghibsky-illustration)
+
+    Trigger words for LoRA 1: ["Cinematic", "Photographic", "Anime", "Manga", "Digital art", "Pixel art", "Fantasy art", 
+                                "Neonpunk", "3D Model", “Painting”, “Animation” “Illustration”]
+
+    Trigger words for LoRA 2: ["GHIBSKY"]
+
+    Inspired by the following [blog](https://huggingface.co/blog/lora-fast)
+    </p>
+    """
+)
 
     with gr.Row():
-        trigger_word = gr.Textbox(label="Trigger Word", placeholder="e.g. GHIBSKY")
+        trigger_word = gr.Textbox(label="Trigger Word", placeholder="e.g. GHIBSKY,Cinematic")
         prompt = gr.Textbox(label="Prompt", placeholder="Describe your image...")
 
     generate_btn = gr.Button("Generate")
@@ -40,4 +60,4 @@ with gr.Blocks() as demo:
     )
 
 if __name__ == "__main__":
-    demo.launch()
+    demo.launch(share=True, debug=True)
