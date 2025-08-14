@@ -21,11 +21,6 @@ local_dir = snapshot_download(
     token=hf_token
 )
 
-local_dir = snapshot_download(
-    repo_id="black-forest-labs/FLUX.1-dev",
-    token=hf_token
-)
-
 @bentoml.service(
     name="flux_lora_service",
     traffic={"timeout": 600},
