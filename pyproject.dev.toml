@@ -15,6 +15,9 @@ max-line-length = 88
 docstring-convention = "numpy"
 ignore = "D204,D401"
 
+[mypy]
+ignore_missing_imports = True
+
 [project.optional-dependencies]
 dev = [
     "isort",
