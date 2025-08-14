@@ -54,7 +54,7 @@ def save_image(image: Image.Image, output_dir: Path = Path("/tmp")) -> Path:
 @bentoml.service(
     name="flux_lora_service",
     traffic={"timeout": 600},
-    resources={"gpu": 1, "gpu_type": "nvidia-l4-24gb"}
+    resources={"gpu": 1, "gpu_type": "nvidia-l4"}
 )
 class FluxLoRAService:
     def __init__(self):
