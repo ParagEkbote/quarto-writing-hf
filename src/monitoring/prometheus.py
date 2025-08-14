@@ -1,3 +1,4 @@
+import os
 import time
 from contextlib import contextmanager
 
@@ -65,5 +66,6 @@ def vram_monitor(tag="Run", adapter="unknown", prompt: str = ""):
 
 
 # Start Prometheus server
-start_http_server(8000)
-print("Prometheus metrics available at http://localhost:8000")
+PROM_PORT = int(os.environ.get("PROMETHEUS_PORT", 8000))
+start_http_server(PROM_PORT)
+print(f"Prometheus metrics available at http://localhost:{PROM_PORT}")

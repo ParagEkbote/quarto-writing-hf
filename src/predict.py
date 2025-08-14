@@ -8,12 +8,13 @@ from typing import Annotated
 import bentoml
 import torch
 from huggingface_hub import snapshot_download
-from PIL import Image  # Import early so type hints work
+from PIL import Image
 
+from src.gradio_frontend import demo
 from src.monitoring.prometheus import vram_monitor
 
+# Hugging Face token and local cache
 hf_token = os.environ.get("HF_TOKEN")
-
 local_dir = snapshot_download(repo_id="black-forest-labs/FLUX.1-dev", token=hf_token)
 
 
@@ -51,11 +52,9 @@ class FluxLoRAService:
 
     @bentoml.on_startup
     def load_model(self):
-        import torch
         from diffusers import DiffusionPipeline
         from diffusers.quantizers import PipelineQuantizationConfig
 
-        # Load pipeline from local_dir instead of repo_id
         self.pipe = DiffusionPipeline.from_pretrained(
             local_dir,  # <- use cached directory
             torch_dtype=torch.bfloat16,
@@ -82,14 +81,10 @@ class FluxLoRAService:
             weight_name="lora_v2.safetensors",
             adapter_name="flux-ghibsky",
         )
-
         self.current_adapter = "open-image-preferences"
 
     @bentoml.api
-    def generate(
-        self, data: Annotated[dict, bentoml.validators.DataframeSchema()]
-    ) -> Annotated[Path, bentoml.validators.ContentType("image/png")]:
-
+    def generate(self, data: dict) -> Annotated[Path, bentoml.validators.ContentType("image/png")]:
         prompt = data["prompt"]
         trigger_word = data.get("trigger_word", "")
 
@@ -124,3 +119,8 @@ class FluxLoRAService:
                     max_sequence_length=512,
                 ).images[0]
             return save_image(image)
+
+
+@bentoml.mount_asgi_app(path="/ui")
+def ui(self):
+    return demo

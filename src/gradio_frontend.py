@@ -6,13 +6,13 @@ import requests  # type: ignore[import]
 from PIL import Image
 
 # Change this to wherever your BentoML service is running
-BENTO_URL: str = "https://diffusers-project1.cloud.bentoml.com/"  # or your deployed endpoint
+BENTO_API_PATH: str = "/generate"  # or your deployed endpoint
 
 
 def generate_image(trigger_word: str, prompt: str) -> Image.Image:
     """Send prompt to BentoML API and return generated image."""
     payload: dict[str, str] = {"trigger_word": trigger_word, "prompt": prompt}
-    response: requests.Response = requests.post(BENTO_URL, json=payload)
+    response: requests.Response = requests.post(BENTO_API_PATH, json=payload)
 
     if response.status_code == 200:
         img: Image.Image = Image.open(BytesIO(response.content))
@@ -116,5 +116,4 @@ with gr.Blocks() as demo:
 
     download_btn.click(fn=provide_download, inputs=image_path_state, outputs=download_file)
 
-if __name__ == "__main__":
-    demo.launch(server_port=7860, share=True, debug=True)
+app = demo
