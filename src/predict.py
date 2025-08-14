@@ -99,7 +99,7 @@ class FluxLoRAService:
         self.pipe.vae = torch.compile(self.pipe.vae, fullgraph=False, mode="reduce-overhead")
 
         with torch.no_grad():
-            with vram_monitor(tag="Image Generation"):
+            with vram_monitor(tag="Image Generation",adapter=adapter, prompt=prompt):
                 image = self.pipe(
                     prompt=prompt,
                     height=1024,
