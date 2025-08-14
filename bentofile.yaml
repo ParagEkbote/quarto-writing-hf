@@ -4,6 +4,8 @@ description: "A blazing-fast inference stack for Flux.1-dev with dynamic LoRA ho
 include:
   - "predict.py"
 
+secrets:
+  - hugging-face-1
 
 exclude:
   - "*.pyc"
@@ -28,10 +30,14 @@ python:
     - "torch>=2.2.0"
     - "torchvision"
     - "torchaudio"
-    - "psutil"  # Added since your code uses psutil
+    - "psutil"
 
 docker:
   base_image: "pytorch/pytorch:2.1.0-cuda12.1-cudnn8-devel"
 
-# Note: GPU resources are specified in your service decorator, not in bentofile.yaml
-# Your service already has: resources={"gpu": 1, "gpu_type": "nvidia-l4-24gb"}
+services:
+  flux_lora_service:
+    instance_type: gpu.l4.1
+    envs:
+      - name: HUGGINGFACE_HUB_TOKEN
+        secret: hugging-face-1

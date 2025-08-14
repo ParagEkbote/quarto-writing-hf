@@ -11,6 +11,7 @@ from typing import Annotated
 import bentoml
 from PIL import Image  # Import early so type hints work
 
+hf_token = os.environ.get("HF_TOKEN")
 
 @contextmanager
 def vram_monitor(tag="Run"):
