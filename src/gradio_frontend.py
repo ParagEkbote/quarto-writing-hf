@@ -6,9 +6,7 @@ import requests  # type: ignore[import]
 from PIL import Image
 
 # Change this to wherever your BentoML service is running
-BENTO_URL: str = (
-    "https://diffusers-project1.cloud.bentoml.com/"  # or your deployed endpoint
-)
+BENTO_URL: str = "https://diffusers-project1.cloud.bentoml.com/"  # or your deployed endpoint
 
 
 def generate_image(trigger_word: str, prompt: str) -> Image.Image:
@@ -91,24 +89,18 @@ with gr.Blocks() as demo:
     )
 
     with gr.Row():
-        trigger_word = gr.Textbox(
-            label="Trigger Word", placeholder="e.g. GHIBSKY,Cinematic"
-        )
+        trigger_word = gr.Textbox(label="Trigger Word", placeholder="e.g. GHIBSKY,Cinematic")
         prompt = gr.Textbox(label="Prompt", placeholder="Describe your image...")
 
     generate_btn = gr.Button("Generate")
     download_btn = gr.Button("Download")  # Separate download button
 
     output_image = gr.Image(label="Generated Image")
-    download_file = gr.File(
-        label="Download Image", visible=False
-    )  # Hidden until download
+    download_file = gr.File(label="Download Image", visible=False)  # Hidden until download
     image_path_state = gr.State()  # Store image internally
 
     # Generate image and store path
-    def generate_and_store(
-        trigger_word: str, prompt: str
-    ) -> Tuple[Image.Image, Image.Image]:
+    def generate_and_store(trigger_word: str, prompt: str) -> Tuple[Image.Image, Image.Image]:
         image: Image.Image = generate_image(trigger_word, prompt)
         return image, image
 
@@ -122,9 +114,7 @@ with gr.Blocks() as demo:
     def provide_download(image: Image.Image) -> Image.Image:
         return image
 
-    download_btn.click(
-        fn=provide_download, inputs=image_path_state, outputs=download_file
-    )
+    download_btn.click(fn=provide_download, inputs=image_path_state, outputs=download_file)
 
 if __name__ == "__main__":
     demo.launch(server_port=7860, share=True, debug=True)
