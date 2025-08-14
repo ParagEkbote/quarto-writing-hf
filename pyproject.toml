@@ -1,12 +1,7 @@
 [tool.bentoml.build]
 service = "src.predict:FluxLoRAService"
 description = "A blazing-fast inference stack for Flux.1-dev with dynamic LoRA hotswapping."
-
-models = [
-    { tag = "black-forest-labs/FLUX.1-dev:latest", alias = "flux_base" },
-    { tag = "data-is-better-together/open-image-preferences-v1-flux-dev-lora:latest", alias = "lora_open_image" },
-    { tag = "aleksa-codes/flux-ghibsky-illustration:latest", alias = "lora_flux_ghibsky" }
-]
+include = ["predict.py", "gradio_frontend.py"]
 
 [tool.bentoml.build.labels]
 owner = "Parag Ekbote"
@@ -17,7 +12,7 @@ gpu = 1
 
 [tool.bentoml.build.python]
 packages = [
-    "pillow>=11.3.0",
+    "pillow>=10.3.0",
     "transformers>=4.52.0",
     "accelerate>=1.8.0",
     "diffusers>=0.33.0",
@@ -27,54 +22,10 @@ packages = [
     "gradio",
     "sentencepiece>=0.1.95",
     "protobuf>=3.20.0",
-    "torch>=2.6.0"
+    "torch>=2.2.0"
 ]
-
-
 
 [tool.bentoml.build.docker]
 distro = "debian"
 python_version = "3.11"
 system_packages = ["libblas-dev", "liblapack-dev", "gfortran"]
-
-[tool.coverage.run]
-source = ["."]
-include = ["skorch/*"]
-omit = [
-    "skorch/tests/*",
-    "skorch/_version.py"
-]
-
-[tool.coverage.report]
-show_missing = true
-skip_covered = false
-
-[tool.flake8]
-max-line-length = 88
-docstring-convention = "numpy"
-ignore = "D204,D401"
-
-[project.optional-dependencies]
-dev = [
-    "isort",
-    "flake8",
-    "black",
-    "pre-commit"
-]
-test = [
-    "pytest>=3.4",
-    "pytest-cov",
-    "flaky"
-]
-
-[tool.pytest.ini_options]
-log_cli = true
-log_cli_level = "INFO"
-addopts = [
-    "--cov=src/",
-    "--cov-report=term-missing",
-    "--cov-config=pyproject.toml",
-    "--durations=0"
-]
-python_files = "test_*.py"
-testpaths = ["tests/"]
