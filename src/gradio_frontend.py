@@ -1,16 +1,15 @@
+from io import BytesIO
+
 import gradio as gr
 import requests
 from PIL import Image
-from io import BytesIO
 
 # Change this to wherever your BentoML service is running
 BENTO_URL = "https://diffusers-project1.cloud.bentoml.com/"  # or your deployed endpoint
 
+
 def generate_image(trigger_word, prompt):
-    payload = {
-        "trigger_word": trigger_word,
-        "prompt": prompt
-    }
+    payload = {"trigger_word": trigger_word, "prompt": prompt}
 
     # Send request to BentoML API
     response = requests.post(BENTO_URL, json=payload)
@@ -22,10 +21,11 @@ def generate_image(trigger_word, prompt):
     else:
         raise gr.Error(f"Error {response.status_code}: {response.text}")
 
+
 # Build Gradio UI
 with gr.Blocks() as demo:
     gr.Markdown(
-    """
+        """
     <style>
         .lora-description {
             font-size: 18px;
@@ -87,7 +87,7 @@ with gr.Blocks() as demo:
         </p>
     </div>
     """
-)
+    )
 
     with gr.Row():
         trigger_word = gr.Textbox(label="Trigger Word", placeholder="e.g. GHIBSKY,Cinematic")
@@ -108,18 +108,14 @@ with gr.Blocks() as demo:
     generate_btn.click(
         fn=generate_and_store,
         inputs=[trigger_word, prompt],
-        outputs=[output_image, image_path_state]
+        outputs=[output_image, image_path_state],
     )
 
     # Trigger download separately
     def provide_download(path):
         return path
 
-    download_btn.click(
-        fn=provide_download,
-        inputs=image_path_state,
-        outputs=download_file
-    )
+    download_btn.click(fn=provide_download, inputs=image_path_state, outputs=download_file)
 
 if __name__ == "__main__":
-    demo.launch( server_port=7860, share=True, debug=True)
+    demo.launch(server_port=7860, share=True, debug=True)

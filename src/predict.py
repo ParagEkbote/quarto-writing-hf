@@ -1,39 +1,46 @@
 from __future__ import annotations
 
 import os
-import uuid
 import time
-import psutil
-from pathlib import Path
+import uuid
 from contextlib import contextmanager
+from pathlib import Path
 from typing import Annotated
-from huggingface_hub import hf_hub_download
 
 import bentoml
+import psutil
+from huggingface_hub import hf_hub_download
 from PIL import Image  # Import early so type hints work
 
 hf_token = os.environ.get("HF_TOKEN")
 
 from huggingface_hub import snapshot_download
 
-local_dir = snapshot_download(
-    repo_id="black-forest-labs/FLUX.1-dev",
-    token=hf_token
-)
+local_dir = snapshot_download(repo_id="black-forest-labs/FLUX.1-dev", token=hf_token)
+
 
 @bentoml.service(
     name="flux_lora_service",
     traffic={"timeout": 600},
-    resources={"gpu": 1, "gpu_type": "nvidia-l4"}
+    resources={"gpu": 1, "gpu_type": "nvidia-l4"},
 )
 class FluxLoRAService:
     def __init__(self):
         self.pipe = None
         self.current_adapter = None
         self.lora1_triggers = [
-            "Cinematic", "Photographic", "Anime", "Manga", "Digital art",
-            "Pixel art", "Fantasy art", "Neonpunk", "3D Model",
-            "Painting", "Animation", "Illustration",
+            "Cinematic",
+            "Photographic",
+            "Anime",
+            "Manga",
+            "Digital art",
+            "Pixel art",
+            "Fantasy art",
+            "Neonpunk",
+            "3D Model",
+            "Painting",
+            "Animation",
+            "Illustration",
         ]
         self.lora2_triggers = ["GHIBSKY"]
 
@@ -74,7 +81,9 @@ class FluxLoRAService:
         self.current_adapter = "open-image-preferences"
 
     @bentoml.api
-    def generate(self, data: Annotated[dict, bentoml.validators.DataframeSchema()]) -> Annotated[Path, bentoml.validators.ContentType("image/png")]:
+    def generate(
+        self, data: Annotated[dict, bentoml.validators.DataframeSchema()]
+    ) -> Annotated[Path, bentoml.validators.ContentType("image/png")]:
         import torch
 
         prompt = data["prompt"]
@@ -84,17 +93,24 @@ class FluxLoRAService:
         if trigger_word in self.lora2_triggers and self.current_adapter != "flux-ghibsky":
             self.pipe.set_adapters(["flux-ghibsky"], adapter_weights=[0.8])
             self.current_adapter = "flux-ghibsky"
-        elif trigger_word in self.lora1_triggers and self.current_adapter != "open-image-preferences":
+        elif (
+            trigger_word in self.lora1_triggers
+            and self.current_adapter != "open-image-preferences"
+        ):
             self.pipe.set_adapters(["open-image-preferences"], adapter_weights=[1.0])
             self.current_adapter = "open-image-preferences"
 
         # Compile components for performance
-        self.pipe.text_encoder = torch.compile(self.pipe.text_encoder, fullgraph=False, mode="reduce-overhead")
-        self.pipe.text_encoder_2 = torch.compile(self.pipe.text_encoder_2, fullgraph=False, mode="reduce-overhead")
+        self.pipe.text_encoder = torch.compile(
+            self.pipe.text_encoder, fullgraph=False, mode="reduce-overhead"
+        )
+        self.pipe.text_encoder_2 = torch.compile(
+            self.pipe.text_encoder_2, fullgraph=False, mode="reduce-overhead"
+        )
         self.pipe.vae = torch.compile(self.pipe.vae, fullgraph=False, mode="reduce-overhead")
 
         with torch.no_grad():
-            with vram_monitor(tag="Image Generation",adapter=adapter, prompt=prompt):
+            with vram_monitor(tag="Image Generation", adapter=adapter, prompt=prompt):
                 image = self.pipe(
                     prompt=prompt,
                     height=1024,

@@ -1,29 +1,16 @@
 import time
-import torch
-import psutil
 from contextlib import contextmanager
-from prometheus_client import Histogram, Gauge,start_http_server
+
+import psutil
+import torch
+from prometheus_client import Gauge, Histogram, start_http_server
 
 # Prometheus metrics
-GEN_TIME = Histogram(
-    "image_generation_seconds",
-    "Time to generate image",
-    ["adapter"]
-)
-VRAM_USED = Gauge(
-    "image_generation_vram_mb",
-    "VRAM used after generation",
-    ["adapter"]
-)
-VRAM_PEAK = Gauge(
-    "image_generation_vram_peak_mb",
-    "Peak VRAM during generation",
-    ["adapter"]
-)
+GEN_TIME = Histogram("image_generation_seconds", "Time to generate image", ["adapter"])
+VRAM_USED = Gauge("image_generation_vram_mb", "VRAM used after generation", ["adapter"])
+VRAM_PEAK = Gauge("image_generation_vram_peak_mb", "Peak VRAM during generation", ["adapter"])
 PROMPT_LENGTH = Histogram(
-    "image_generation_prompt_length",
-    "Length of the prompt in characters",
-    ["adapter"]
+    "image_generation_prompt_length", "Length of the prompt in characters", ["adapter"]
 )
 
 
@@ -46,8 +33,8 @@ def vram_monitor(tag="Run", adapter="unknown", prompt: str = ""):
 
     if torch.cuda.is_available():
         torch.cuda.synchronize()
-        end_vram = torch.cuda.memory_allocated() / (1024 ** 2)
-        peak_vram = torch.cuda.max_memory_allocated() / (1024 ** 2)
+        end_vram = torch.cuda.memory_allocated() / (1024**2)
+        peak_vram = torch.cuda.max_memory_allocated() / (1024**2)
         torch.cuda.reset_peak_memory_stats()
     else:
         end_vram = 0
