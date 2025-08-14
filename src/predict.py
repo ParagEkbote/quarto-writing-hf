@@ -1,9 +1,13 @@
 import os
 import uuid
 from pathlib import Path
+import time
+import psutil
+from contextlib import contextmanager
+from PIL import Image
 
 import bentoml
-from bentoml.io import JSON, File
+from bentoml.io import JSON as JsonIO, File as FileIO  
 
 with bentoml.importing():
     import torch
@@ -11,32 +15,22 @@ with bentoml.importing():
     from diffusers.quantizers import PipelineQuantizationConfig
     from huggingface_hub import login
 
-from PIL import Image
-
-import time
-import torch
-import psutil
-from contextlib import contextmanager
 
 @contextmanager
 def vram_monitor(tag="Run"):
-    """
-    Context manager to log VRAM & CPU RAM usage around a code block.
-    """
+    """Context manager to log VRAM & CPU RAM usage."""
     torch.cuda.synchronize()
     start_time = time.time()
 
-    # Get initial memory stats
     start_vram = torch.cuda.memory_allocated() / (1024 ** 2)
     start_vram_reserved = torch.cuda.memory_reserved() / (1024 ** 2)
     start_cpu_mem = psutil.Process().memory_info().rss / (1024 ** 2)
 
-    yield  # Execute the code inside the context
+    yield
 
     torch.cuda.synchronize()
     end_time = time.time()
 
-    # Get final memory stats
     end_vram = torch.cuda.memory_allocated() / (1024 ** 2)
     end_vram_reserved = torch.cuda.memory_reserved() / (1024 ** 2)
     peak_vram = torch.cuda.max_memory_allocated() / (1024 ** 2)
@@ -50,16 +44,7 @@ def vram_monitor(tag="Run"):
     print(f"CPU RAM:        {start_cpu_mem:.2f} MB → {end_cpu_mem:.2f} MB\n")
 
     torch.cuda.reset_peak_memory_stats()
-    
-@bentoml.service(
-    name="diffusers-fast-lora",
-    traffic={"timeout": 300},
-    envs=[{"name": "HF_TOKEN"}],
-    resources={
-        "gpu": 1,
-        "gpu_type": "nvidia-l4-24gb"
-    },
-)
+
 
 def save_image(image: Image.Image, output_dir: Path = Path("/tmp")) -> Path:
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -68,13 +53,14 @@ def save_image(image: Image.Image, output_dir: Path = Path("/tmp")) -> Path:
     return output_path
 
 
-@bentoml.service(name="flux_lora_service", traffic={"timeout": 600})
+@bentoml.service(name="flux_lora_service", traffic={"timeout": 600}, resources={"gpu": 1, "gpu_type": "nvidia-l4-24gb"})
 class FluxLoRAService:
     @bentoml.on_startup
     def __init__(self):
         base_model_path = bentoml.models.get("flux_base").path
         lora_open_path = bentoml.models.get("lora_open_image").path
         lora_ghibsky_path = bentoml.models.get("lora_flux_ghibsky").path
+
         self.pipe = DiffusionPipeline.from_pretrained(
             "black-forest-labs/FLUX.1-dev",
             torch_dtype=torch.bfloat16,
@@ -90,16 +76,19 @@ class FluxLoRAService:
         ).to("cuda")
 
         self.pipe.enable_lora_hotswap(target_rank=8)
-        self.pipe.load_lora_weights(lora_open_path,
+        self.pipe.load_lora_weights(
+            lora_open_path,
             "data-is-better-together/open-image-preferences-v1-flux-dev-lora",
             weight_name="pytorch_lora_weights.safetensors",
             adapter_name="open-image-preferences",
         )
-        self.pipe.load_lora_weights(lora_ghibsky_path,
+        self.pipe.load_lora_weights(
+            lora_ghibsky_path,
             "aleksa-codes/flux-ghibsky-illustration",
             weight_name="lora_v2.safetensors",
             adapter_name="flux-ghibsky",
         )
+
         self.current_adapter = "open-image-preferences"
         self.lora1_triggers = [
             "Cinematic", "Photographic", "Anime", "Manga", "Digital art",
@@ -108,7 +97,7 @@ class FluxLoRAService:
         ]
         self.lora2_triggers = ["GHIBSKY"]
 
-    @bentoml.api(input=JSON(), output=File())
+    @bentoml.api(input=JsonIO(), output=FileIO())
     def generate(self, data: dict) -> Path:
         prompt = data["prompt"]
         trigger_word = data["trigger_word"]
