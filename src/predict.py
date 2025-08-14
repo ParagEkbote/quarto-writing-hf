@@ -6,9 +6,9 @@ import time
 import psutil
 from pathlib import Path
 from contextlib import contextmanager
+from typing import Annotated
 
 import bentoml
-from bentoml.io import JSON as JsonIO, File as FileIO
 from PIL import Image  # Import early so type hints work
 
 
@@ -101,8 +101,8 @@ class FluxLoRAService:
 
         self.current_adapter = "open-image-preferences"
 
-    @bentoml.api(input=JsonIO(), output=FileIO())
-    def generate(self, data: dict) -> Path:
+    @bentoml.api
+    def generate(self, data: Annotated[dict, bentoml.validators.DataframeSchema()]) -> Annotated[Path, bentoml.validators.ContentType("image/png")]:
         import torch
 
         prompt = data["prompt"]

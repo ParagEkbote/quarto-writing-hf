@@ -1,48 +1,44 @@
-#bento usage file
+# Makefile for BentoML workflow
+# Usage:
+#   make build DEPLOYMENT_NAME=my-service
+#   make deploy DEPLOYMENT_NAME=my-service
+#   make update DEPLOYMENT_NAME=my-service
+#   make containerize
+#   make push
 
 # Variables
 SERVICE_NAME := service:MyService
-BENTO_TAG := flux-lora-inference:latest
+DEPLOYMENT_NAME ?= my-bento-deployment
+BENTO_TAG := $(shell bentoml build --print-tag $(SERVICE_NAME) 2>/dev/null || echo "")
 
-# Dry-run: Check if service is importable and BentoML config is valid
-dry-run:
-	bentoml build --print --service $(SERVICE_NAME)
+.PHONY: build deploy update containerize push clean
 
 # Build Bento
 build:
-	bentoml build
+	bentoml build $(SERVICE_NAME)
 
-# Build Bento and tag
-build-tag:
-	bentoml build -t $(BENTO_TAG)
+# Deploy to BentoCloud
+deploy:
+ifndef DEPLOYMENT_NAME
+	$(error DEPLOYMENT_NAME is not set. Use `make deploy DEPLOYMENT_NAME=my-service`)
+endif
+	bentoml deploy $(BENTO_TAG) -n $(DEPLOYMENT_NAME)
 
-# Serve locally (debug mode)
-serve:
-	bentoml serve $(SERVICE_NAME) --reload
+# Update an existing deployment
+update:
+ifndef DEPLOYMENT_NAME
+	$(error DEPLOYMENT_NAME is not set. Use `make update DEPLOYMENT_NAME=my-service`)
+endif
+	bentoml deployment update --bento $(BENTO_TAG) $(DEPLOYMENT_NAME)
 
-# Serve locally with GPU
-serve-gpu:
-	bentoml serve $(SERVICE_NAME) --reload --device cuda
-
-# Build Docker image from Bento
-docker-build:
+# Containerize Bento
+containerize:
 	bentoml containerize $(BENTO_TAG)
 
-# Push Docker image to registry
-docker-push:
-	docker push $(BENTO_TAG)
+# Push Bento to BentoCloud
+push:
+	bentoml push $(BENTO_TAG)
 
-# Deploy to BentoCloud (requires login & config)
-deploy:
-	bentoml deploy $(BENTO_TAG) --platform docker
-
-# List Bentos in local store
-list:
-	bentoml list
-
-# Clean up built Bentos
+# Clean build artifacts
 clean:
-	bentoml delete --yes $(BENTO_TAG) || true
-
-# Full workflow: dry-run -> build -> containerize
-all: dry-run build docker-build
+	rm -rf build dist .bento
