@@ -1,5 +1,5 @@
-bento: flux_lora_service:latest
-name: diffusers_fast_lora_bentoml
+bento: flux_lora_service:dznhtjtzdkbc47a6
+name: ${DEPLOYMENT_NAME}
 access_authorization: false
 
 secrets:
@@ -17,6 +17,9 @@ services:
       traffic:
         timeout: 300
         concurrency: 256
+      ports:
+      - 5000
+      - 8000
     deployment_strategy: Recreate
 
 cluster: gcp-us-central-1

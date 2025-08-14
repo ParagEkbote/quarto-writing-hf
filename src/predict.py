@@ -7,49 +7,24 @@ import psutil
 from pathlib import Path
 from contextlib import contextmanager
 from typing import Annotated
+from huggingface_hub import hf_hub_download
 
 import bentoml
 from PIL import Image  # Import early so type hints work
 
 hf_token = os.environ.get("HF_TOKEN")
 
-@contextmanager
-def vram_monitor(tag="Run"):
-    """Context manager to log VRAM & CPU RAM usage."""
-    import torch
-    torch.cuda.synchronize()
-    start_time = time.time()
+from huggingface_hub import snapshot_download
 
-    start_vram = torch.cuda.memory_allocated() / (1024 ** 2)
-    start_vram_reserved = torch.cuda.memory_reserved() / (1024 ** 2)
-    start_cpu_mem = psutil.Process().memory_info().rss / (1024 ** 2)
+local_dir = snapshot_download(
+    repo_id="black-forest-labs/FLUX.1-dev",
+    token=hf_token
+)
 
-    yield
-
-    torch.cuda.synchronize()
-    end_time = time.time()
-
-    end_vram = torch.cuda.memory_allocated() / (1024 ** 2)
-    end_vram_reserved = torch.cuda.memory_reserved() / (1024 ** 2)
-    peak_vram = torch.cuda.max_memory_allocated() / (1024 ** 2)
-    end_cpu_mem = psutil.Process().memory_info().rss / (1024 ** 2)
-
-    print(f"\n[{tag}] Performance Report:")
-    print(f"Elapsed time: {end_time - start_time:.2f} sec")
-    print(f"VRAM Allocated: {start_vram:.2f} MB → {end_vram:.2f} MB")
-    print(f"VRAM Reserved:  {start_vram_reserved:.2f} MB → {end_vram_reserved:.2f} MB")
-    print(f"Peak VRAM:      {peak_vram:.2f} MB")
-    print(f"CPU RAM:        {start_cpu_mem:.2f} MB → {end_cpu_mem:.2f} MB\n")
-
-    torch.cuda.reset_peak_memory_stats()
-
-
-def save_image(image: Image.Image, output_dir: Path = Path("/tmp")) -> Path:
-    output_dir.mkdir(parents=True, exist_ok=True)
-    output_path = output_dir / f"{uuid.uuid4().hex}.png"
-    image.save(output_path)
-    return output_path
-
+local_dir = snapshot_download(
+    repo_id="black-forest-labs/FLUX.1-dev",
+    token=hf_token
+)
 
 @bentoml.service(
     name="flux_lora_service",
@@ -73,9 +48,9 @@ class FluxLoRAService:
         from diffusers import DiffusionPipeline
         from diffusers.quantizers import PipelineQuantizationConfig
 
-        # Lazily load to avoid build-time GPU needs
+        # Load pipeline from local_dir instead of repo_id
         self.pipe = DiffusionPipeline.from_pretrained(
-            "black-forest-labs/FLUX.1-dev",
+            local_dir,  # <- use cached directory
             torch_dtype=torch.bfloat16,
             quantization_config=PipelineQuantizationConfig(
                 quant_backend="bitsandbytes_4bit",
@@ -89,6 +64,7 @@ class FluxLoRAService:
         ).to("cuda")
 
         self.pipe.enable_lora_hotswap(target_rank=8)
+        # Load LoRA adapters as before
         self.pipe.load_lora_weights(
             "data-is-better-together/open-image-preferences-v1-flux-dev-lora",
             weight_name="pytorch_lora_weights.safetensors",
@@ -123,7 +99,7 @@ class FluxLoRAService:
         self.pipe.vae = torch.compile(self.pipe.vae, fullgraph=False, mode="reduce-overhead")
 
         with torch.no_grad():
-            with vram_monitor(tag="Image Generation",adapter=adapter, prompt=prompt):
+            with vram_monitor(tag="Image Generation"):
                 image = self.pipe(
                     prompt=prompt,
                     height=1024,
