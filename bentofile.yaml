@@ -32,7 +32,7 @@ python:
     - "psutil"  # Added since your code uses psutil
 
 docker:
-  base_image: "nvidia/cuda:12.1-devel-ubuntu22.04"
+  base_image: "nvidia/cuda:12.1.0-devel-ubuntu22.04"
 
 # Note: GPU resources are specified in your service decorator, not in bentofile.yaml
 # Your service already has: resources={"gpu": 1, "gpu_type": "nvidia-l4-24gb"}
