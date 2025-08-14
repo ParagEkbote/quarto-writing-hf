@@ -7,14 +7,21 @@ from typing import Annotated
 
 import bentoml
 import torch
-from PIL import Image  # Import early so type hints work
 from huggingface_hub import snapshot_download
+from PIL import Image  # Import early so type hints work
 
-from src.monitoring.prometheus import vram_monitor  
+from src.monitoring.prometheus import vram_monitor
 
 hf_token = os.environ.get("HF_TOKEN")
 
 local_dir = snapshot_download(repo_id="black-forest-labs/FLUX.1-dev", token=hf_token)
+
+
+def save_image(image: Image.Image, output_dir: Path = Path("/tmp")) -> Path:
+    output_dir.mkdir(parents=True, exist_ok=True)
+    output_path = output_dir / f"{uuid.uuid4().hex}.png"
+    image.save(output_path)
+    return output_path
 
 
 @bentoml.service(
