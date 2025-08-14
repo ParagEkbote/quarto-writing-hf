@@ -1,7 +1,8 @@
 [tool.bentoml.build]
 service = "src.predict:FluxLoRAService"
 description = "A blazing-fast inference stack for Flux.1-dev with dynamic LoRA hotswapping."
-include = ["predict.py", "gradio_frontend.py"]
+include = ["predict.py", "gradio_frontend.py","src/"]
+exclude = ["*.pyc", "__pycache__/"]
 
 [tool.bentoml.build.labels]
 owner = "Parag Ekbote"
@@ -22,10 +23,10 @@ packages = [
     "gradio",
     "sentencepiece>=0.1.95",
     "protobuf>=3.20.0",
-    "torch>=2.2.0"
+    "torch>=2.2.0",
+    "torchvision", 
+    "torchaudio" 
 ]
 
 [tool.bentoml.build.docker]
-distro = "debian"
-python_version = "3.11"
-system_packages = ["libblas-dev", "liblapack-dev", "gfortran"]
+base_image = "nvidia/cuda:12.1-devel-ubuntu22.04"
