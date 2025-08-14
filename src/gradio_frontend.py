@@ -4,7 +4,7 @@ from PIL import Image
 from io import BytesIO
 
 # Change this to wherever your BentoML service is running
-BENTO_URL = "http://localhost:3000/generate"  # or your deployed endpoint
+BENTO_URL = "https://diffusers-project1.cloud.bentoml.com/"  # or your deployed endpoint
 
 def generate_image(trigger_word, prompt):
     payload = {

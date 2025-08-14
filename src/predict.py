@@ -2,13 +2,15 @@ import os
 import uuid
 from pathlib import Path
 
-import torch
 import bentoml
 from bentoml.io import JSON, File
-from diffusers import DiffusionPipeline
-from diffusers.quantizers import PipelineQuantizationConfig
 
-from huggingface_hub import login
+with bentoml.importing():
+    import torch
+    from diffusers import DiffusionPipeline
+    from diffusers.quantizers import PipelineQuantizationConfig
+    from huggingface_hub import login
+
 from PIL import Image
 
 import time
@@ -55,7 +57,7 @@ def vram_monitor(tag="Run"):
     envs=[{"name": "HF_TOKEN"}],
     resources={
         "gpu": 1,
-        "gpu_type": "nvidia-a100-80gb"
+        "gpu_type": "nvidia-l4-24gb"
     },
 )
 

@@ -1,5 +1,5 @@
 [tool.bentoml.build]
-service = "service:MyService"
+service = "src.predict:FluxLoRAService"
 description = "A blazing-fast inference stack for Flux.1-dev with dynamic LoRA hotswapping."
 
 models = [
@@ -26,12 +26,11 @@ packages = [
     "peft>=0.15.0",
     "gradio",
     "sentencepiece>=0.1.95",
-    "protobuf>=3.20.0"
+    "protobuf>=3.20.0",
+    "torch>=2.6.0"
 ]
-pip_args = [
-    "--no-cache-dir",
-    "--extra-index-url=https://download.pytorch.org/whl/cu121"
-]
+
+
 
 [tool.bentoml.build.docker]
 distro = "debian"
