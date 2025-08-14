@@ -2,7 +2,7 @@ import time
 import torch
 import psutil
 from contextlib import contextmanager
-from prometheus_client import Histogram, Gauge, make_asgi_app,start_http_server
+from prometheus_client import Histogram, Gauge,start_http_server
 
 # Prometheus metrics
 GEN_TIME = Histogram(
@@ -67,6 +67,5 @@ def vram_monitor(tag="Run", adapter="unknown", prompt: str = ""):
     )
 
 
-#start_http_server(8000)
-# ASGI app for Prometheus scraping
-#app = make_asgi_app()
+start_http_server(8000)
+print("Prometheus metrics available at http://localhost:8000")
