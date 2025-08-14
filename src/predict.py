@@ -1,20 +1,18 @@
 from __future__ import annotations
 
 import os
-import time
 import uuid
-from contextlib import contextmanager
 from pathlib import Path
 from typing import Annotated
 
 import bentoml
-import psutil
-from huggingface_hub import hf_hub_download
+import torch
 from PIL import Image  # Import early so type hints work
+from huggingface_hub import snapshot_download
+
+from src.monitoring.prometheus import vram_monitor  
 
 hf_token = os.environ.get("HF_TOKEN")
-
-from huggingface_hub import snapshot_download
 
 local_dir = snapshot_download(repo_id="black-forest-labs/FLUX.1-dev", token=hf_token)
 
@@ -84,7 +82,6 @@ class FluxLoRAService:
     def generate(
         self, data: Annotated[dict, bentoml.validators.DataframeSchema()]
     ) -> Annotated[Path, bentoml.validators.ContentType("image/png")]:
-        import torch
 
         prompt = data["prompt"]
         trigger_word = data.get("trigger_word", "")
@@ -110,7 +107,7 @@ class FluxLoRAService:
         self.pipe.vae = torch.compile(self.pipe.vae, fullgraph=False, mode="reduce-overhead")
 
         with torch.no_grad():
-            with vram_monitor(tag="Image Generation", adapter=adapter, prompt=prompt):
+            with vram_monitor(tag="Image Generation", adapter=self.current_adapter, prompt=prompt):
                 image = self.pipe(
                     prompt=prompt,
                     height=1024,
