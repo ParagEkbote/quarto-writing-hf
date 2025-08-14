@@ -1,22 +1,22 @@
 from io import BytesIO
+from typing import Tuple
 
 import gradio as gr
 import requests
 from PIL import Image
+from requests.models import Response
 
 # Change this to wherever your BentoML service is running
-BENTO_URL = "https://diffusers-project1.cloud.bentoml.com/"  # or your deployed endpoint
+BENTO_URL: str = "https://diffusers-project1.cloud.bentoml.com/"  # or your deployed endpoint
 
 
-def generate_image(trigger_word, prompt):
-    payload = {"trigger_word": trigger_word, "prompt": prompt}
-
-    # Send request to BentoML API
-    response = requests.post(BENTO_URL, json=payload)
+def generate_image(trigger_word: str, prompt: str) -> Image.Image:
+    """Send prompt to BentoML API and return generated image."""
+    payload: dict[str, str] = {"trigger_word": trigger_word, "prompt": prompt}
+    response: Response = requests.post(BENTO_URL, json=payload)
 
     if response.status_code == 200:
-        # Convert binary image to PIL
-        img = Image.open(BytesIO(response.content))
+        img: Image.Image = Image.open(BytesIO(response.content))
         return img
     else:
         raise gr.Error(f"Error {response.status_code}: {response.text}")
@@ -101,9 +101,9 @@ with gr.Blocks() as demo:
     image_path_state = gr.State()  # Store file path internally
 
     # Generate image and store path
-    def generate_and_store(trigger_word, prompt):
-        image_path = generate_image(trigger_word, prompt)  # Return path
-        return image_path, image_path  # (display image, store path)
+    def generate_and_store(trigger_word: str, prompt: str) -> Tuple[Image.Image, Image.Image]:
+        image_path: Image.Image = generate_image(trigger_word, prompt)
+        return image_path, image_path
 
     generate_btn.click(
         fn=generate_and_store,
@@ -112,7 +112,7 @@ with gr.Blocks() as demo:
     )
 
     # Trigger download separately
-    def provide_download(path):
+    def provide_download(path: Image.Image) -> Image.Image:
         return path
 
     download_btn.click(fn=provide_download, inputs=image_path_state, outputs=download_file)
