@@ -1,8 +1,19 @@
 global:
-  scrape_interval: 15s
-  evaluation_interval: 15s
+  scrape_interval: 5s  # How often to scrape targets
+  evaluation_interval: 5s
 
 scrape_configs:
-  - job_name: 'flux_lora_predict'
+  - job_name: "bentoml_service"
+    metrics_path: "/metrics"  # BentoML ASGI app will serve this
     static_configs:
-      - targets: ['flux_lora_service-gpu:8000']
+      - targets: ["localhost:3000"]  # Replace with your Bento service host:port
+
+  - job_name: "predict_metrics"
+    metrics_path: "/metrics"
+    static_configs:
+      - targets: ["localhost:8000"]  # Port where predict.py exposes Prometheus metrics
+
+  - job_name: "gpu_metrics"
+    metrics_path: "/metrics"
+    static_configs:
+      - targets: ["localhost:9400"]  # If using nvidia-dcgm-exporter or node exporter with GPU metrics

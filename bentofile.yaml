@@ -2,8 +2,9 @@ service: "src.predict:FluxLoRAService"
 description: "A blazing-fast inference stack for Flux.1-dev with dynamic LoRA hotswapping."
 
 include:
-  - "predict.py"
+  - "src/predict.py"
   - "src/gradio_frontend.py"
+  - "src/monitoring/prometheus.py"
 
 
 exclude:
@@ -25,6 +26,7 @@ python:
     - "peft>=0.15.0"
     - "gradio"
     - "fastapi"
+    - "prometheus_client"
     - "sentencepiece>=0.1.95"
     - "protobuf>=3.20.0"
     - "torch>=2.2.0"
@@ -33,6 +35,6 @@ python:
     - "psutil"
 
 docker:
-  base_image: "pytorch/pytorch:2.1.0-cuda12.1-cudnn8-devel"
+  base_image: "pytorch/pytorch:2.2.0-cuda12.1-cudnn8-devel"
 
 

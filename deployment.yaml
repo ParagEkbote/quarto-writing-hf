@@ -12,14 +12,22 @@ services:
       min_replicas: 0
       max_replicas: 1
     envs:
-      - name: HF_TOKEN
+      - name: BENTO_API_URL
+        value: "/generate"
     config_overrides:
       traffic:
         timeout: 300
         concurrency: 256
       ports:
-      - 5000
-      - 8000
+        - http: 3000  # external port
+        - http: 9090  # internal port
+    routes:
+      - path: /generate
+        method: POST
+        type: bentoml
+      - path: /ui
+        method: GET
+        type: asgi
     deployment_strategy: Recreate
 
 cluster: gcp-us-central-1

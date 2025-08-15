@@ -121,6 +121,6 @@ class FluxLoRAService:
             return save_image(image)
 
 
-@bentoml.mount_asgi_app(path="/ui")
-def ui(self):
-    return demo
+@bentoml.mount_asgi_app(app=demo, path="/ui")
+def mount_ui():
+    pass
