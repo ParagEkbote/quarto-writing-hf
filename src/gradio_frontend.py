@@ -55,6 +55,26 @@ with gr.Blocks() as demo:
             By enabling <em>LoRA hotswapping</em>, you can instantly switch between multiple style adapters without 
             reloading the model.
         </p>
+        <p>
+            <strong>Base model:</strong> 
+            <a href="https://huggingface.co/black-forest-labs/FLUX.1-dev" target="_blank">
+            black-forest-labs/FLUX.1-dev</a><br>
+            <strong>LoRA 1:</strong> 
+            <a href="https://huggingface.co/data-is-better-together/open-image-preferences-v1-flux-dev-lora" target="_blank">
+            data-is-better-together/open-image-preferences-v1-flux-dev-lora</a><br>
+            <strong>LoRA 2:</strong> 
+            <a href="https://huggingface.co/aleksa-codes/flux-ghibsky-illustration" target="_blank">
+            aleksa-codes/flux-ghibsky-illustration</a>
+        </p>
+        <p>
+            <strong>Trigger words for LoRA 1:</strong> Cinematic, Photographic, Anime, Manga, Digital art, Pixel art, Fantasy art, 
+            Neonpunk, 3D Model, Painting, Animation, Illustration<br>
+            <strong>Trigger words for LoRA 2:</strong> GHIBSKY
+        </p>
+        <p>
+            Inspired by the following 
+            <a href="https://huggingface.co/blog/lora-fast" target="_blank">blog post</a>.
+        </p>
     </div>
     """
     )
