@@ -3,6 +3,7 @@ description: "A blazing-fast inference stack for Flux.1-dev with dynamic LoRA ho
 
 include:
   - "predict.py"
+  - "src/gradio_frontend.py"
 
 
 exclude:

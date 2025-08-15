@@ -20,7 +20,6 @@ services:
       ports:
       - 5000
       - 8000
-      - 7860 
     deployment_strategy: Recreate
 
 cluster: gcp-us-central-1
