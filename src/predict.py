@@ -10,8 +10,8 @@ import torch
 from huggingface_hub import snapshot_download
 from PIL import Image
 
-from src.gradio_frontend import demo
-from src.monitoring.prometheus import vram_monitor
+from src.gradio_frontend import frontend_app
+from src.monitoring.prometheus import vram_monitor, start_prometheus_server
 
 # Hugging Face token and local cache
 hf_token = os.environ.get("HF_TOKEN")
@@ -54,6 +54,8 @@ class FluxLoRAService:
     def load_model(self):
         from diffusers import DiffusionPipeline
         from diffusers.quantizers import PipelineQuantizationConfig
+
+        start_prometheus_server()
 
         self.pipe = DiffusionPipeline.from_pretrained(
             local_dir,  # <- use cached directory
@@ -121,6 +123,6 @@ class FluxLoRAService:
             return save_image(image)
 
 
-@bentoml.mount_asgi_app(app=demo, path="/ui")
+@bentoml.mount_asgi_app(app = frontend_app, path="/ui")
 def mount_ui():
     pass

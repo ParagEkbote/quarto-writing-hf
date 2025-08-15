@@ -34,7 +34,7 @@ def save_temp_image(image: Image.Image) -> str:
 
 
 # Build Gradio UI
-with gr.Blocks() as demo:
+with gr.Blocks() as frontend_app:
     gr.Markdown(
         """
     <style>
@@ -108,4 +108,4 @@ with gr.Blocks() as demo:
 
     download_btn.click(fn=provide_download, inputs=image_path_state, outputs=download_file)
 
-app = demo
+app = frontend_app

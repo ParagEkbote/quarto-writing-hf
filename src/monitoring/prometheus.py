@@ -65,7 +65,14 @@ def vram_monitor(tag="Run", adapter="unknown", prompt: str = ""):
     )
 
 
-# Start Prometheus server
-PROM_PORT = int(os.environ.get("PROMETHEUS_PORT", 9090))
-start_http_server(PROM_PORT)
-print(f"Prometheus metrics available at http://localhost:{PROM_PORT}")
+# Start Prometheus server only if explicitly requested
+def start_prometheus_server():
+    PROM_PORT = int(os.environ.get("PROMETHEUS_PORT", 9090))
+    try:
+        start_http_server(PROM_PORT)
+        print(f"Prometheus metrics available at http://localhost:{PROM_PORT}")
+    except OSError:
+        print(f"Prometheus server already running on port {PROM_PORT}")
+
+
+# Call this in BentoML service startup, e.g., @service.on_startup
