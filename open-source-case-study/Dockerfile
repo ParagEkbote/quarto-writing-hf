@@ -1,4 +1,4 @@
-ARG QUARTO_VERSION="1.8.26"
+ARG QUARTO_VERSION="1.4.550"
 
 # Use the Quarto base image
 FROM ghcr.io/quarto-dev/quarto:${QUARTO_VERSION} AS builder
