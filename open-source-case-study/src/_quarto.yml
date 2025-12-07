@@ -1,15 +1,24 @@
 project:
   type: website
+  output-dir: _site
+
+  publisher:
+    pull: false   # prevent conflicting remote pulls on publish
 
 website:
   title: "What 90+ Open-Source PRs Taught Me About Software Quality and Engineering at Scale"
-  site-url: "https://yourusername.github.io/your-repo-name"
+
+  # for Hugging Face Spaces, omit or replace with space URL
+  # site-url: "https://yourusername.github.io/your-repo-name"
+  # If hosting on HF, uncomment this instead:
+  # site-url: "https://AINovice2005-open-source-case-study.hf.space"
+
   sidebar:
-    style: "docked"
+    style: docked
     search: true
     collapse-level: 3
     contents:
-      - section: "What 90+ Open-Source PRs Taught Me About Software Quality and Engineering at Scale"
+      - section: "Case Study"
         contents:
           - text: "Turning PRs into Data"
             href: index.qmd#turning-prs-into-data
@@ -21,6 +30,7 @@ website:
             href: index.qmd#good-practices-while-contributing
           - text: "Reflections for Future Contributions"
             href: index.qmd#reflections-for-future-contributions
+
       - section: "About"
         contents:
           - href: about.qmd
