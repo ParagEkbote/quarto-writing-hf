@@ -1,0 +1,15 @@
+---
+title: "What 90+ Open-Source PRs Taught Me About Software Quality and Engineering at Scale"
+listing:
+  contents: posts
+  feed: true
+  sort: "date desc"
+  type: default
+  categories: true
+  sort-ui: false
+  filter-ui: false
+page-layout: full
+title-block-banner: true
+---
+
+
