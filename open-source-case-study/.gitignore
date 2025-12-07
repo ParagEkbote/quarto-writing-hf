@@ -1,2 +1,14 @@
 /.quarto/
 **/*.quarto_ipynb
+__pycache__
+*.py[cod]
+*.so
+.Python
+env/
+venv/
+*.egg-info/
+dist/
+build/
+*.egg
+.idea/
+.vscode/
