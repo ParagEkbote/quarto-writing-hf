@@ -1,18 +1,10 @@
 ---
-title: "About"
-about:
-  links:
-    - icon: linkedin
-      text: LinkedIn
-      href: https://www.linkedin.com/in/parag-ekbote/
-    - icon: github
-      text: Github
-      href: https://github.com/ParagEkbote
+title: "Motivation"
 ---
 
-## About This Project
+This space documents insights and lessons learned from contributing 90+ pull requests to 20+ open-source projects. It explores software quality, engineering practices at scale and effective collaboration in distributed teams.
 
-This site documents insights and lessons learned from contributing 90+ pull requests to 20+ open-source projects. It explores software quality, engineering practices at scale and effective collaboration in distributed teams.
+---
 
 ### What You'll Find Here
 

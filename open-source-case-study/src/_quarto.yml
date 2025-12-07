@@ -3,22 +3,24 @@ project:
 
 website:
   title: "What 90+ Open-Source PRs Taught Me About Software Quality and Engineering at Scale"
+  site-url: "https://yourusername.github.io/your-repo-name"
   sidebar:
     style: "docked"
     search: true
     collapse-level: 3
     contents:
-      - section: "About"
-        contents:
-          - href: about.qmd
-            text: About
       - section: "What 90+ Open-Source PRs Taught Me About Software Quality and Engineering at Scale"
         contents:
           - text: "Turning PRs into Data"
+          - href: 
           - text: "Why Contributing at Scale Matters in Open Source"
           - text: "Featured Contributions and Recognition"
           - text: "Good Practices While Contributing"
           - text: "Reflections for Future Contributions"
+      - section: "About"
+        contents:
+          - href: about.qmd
+            text: About
 
 format:
   html:
