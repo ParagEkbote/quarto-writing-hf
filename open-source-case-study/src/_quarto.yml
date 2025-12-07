@@ -10,20 +10,15 @@ website:
     contents:
       - section: "About"
         contents:
-          - href: index.qmd
+          - href: about.qmd
             text: About
       - section: "What 90+ Open-Source PRs Taught Me About Software Quality and Engineering at Scale"
         contents:
           - text: "Turning PRs into Data"
-            href: turning-prs-into-data.qmd
           - text: "Why Contributing at Scale Matters in Open Source"
-            href: why-contributing-matters.qmd
           - text: "Featured Contributions and Recognition"
-            href: featured-contributions.qmd
           - text: "Good Practices While Contributing"
-            href: good-practices.qmd
           - text: "Reflections for Future Contributions"
-            href: reflections.qmd
 
 format:
   html:

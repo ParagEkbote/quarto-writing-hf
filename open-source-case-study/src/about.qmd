@@ -1,8 +1,6 @@
 ---
 title: "About"
-image: profile.jpg
 about:
-  template: jolla
   links:
     - icon: linkedin
       text: LinkedIn
@@ -14,7 +12,7 @@ about:
 
 ## About This Project
 
-This site documents insights and lessons learned from contributing 90+ pull requests to open-source projects. It explores software quality, engineering practices at scale and effective collaboration in distributed teams.
+This site documents insights and lessons learned from contributing 90+ pull requests to 20+ open-source projects. It explores software quality, engineering practices at scale and effective collaboration in distributed teams.
 
 ### What You'll Find Here
 
