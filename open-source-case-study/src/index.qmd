@@ -1,13 +1,5 @@
 ---
 title: "What 90+ Open-Source PRs Taught Me About Software Quality and Engineering at Scale"
-listing:
-  contents: posts
-  feed: true
-  sort: "date desc"
-  type: default
-  categories: true
-  sort-ui: false
-  filter-ui: false
 page-layout: full
 title-block-banner: true
 ---
@@ -20,7 +12,7 @@ The headline finding: **88.2% first-try merge rate and 4.43 average review comme
 
 This case study transforms raw contribution data into actionable engineering insights. We examine what does contribution volume enables at a larger scale, how to quantify pull requests systematically, what code review patterns emerge at scale, which collaboration practices accelerate merges and what 95 PRs taught me about impact in open source.
 
-## Turning PRs into Data
+## Turning PRs into Data {#turning-prs-into-data}
 
 To understand contribution patterns, I converted raw GitHub activity into structured values using both the GraphQL and REST API from GitHub. The collected events were processed through python scripts and exported as JSON metrics. These metrics were then visualized to reveal consistent patterns across pull requests.
 
@@ -38,7 +30,7 @@ Before diving into patterns, let's establish what the key metrics actually measu
 
 **First-Try Merge Rate (88.2%):** The percentage of PRs that got merged without requiring any changes after initial submission. This is NOT the same as acceptance rate (which would include rejected PRs). It measures **code quality alignment** with project standards before submission.
 
-## Why Contributing at Scale Matters in Open Source
+## Why Contributing at Scale Matters in Open Source {#why-contributing-at-scale-matters-in-open-source}
 
 **The contribution pyramid visualizes the distribution of contributors based on lifetime pull requests across open-source projects.** The majority of contributors submit fewer than 10 PRs, forming the broad base of the pyramid. As contribution volume increases, the number of individuals sharply decreases, roughly 20% of contributors have 10–50 PRs, only ~5% exceed 50 PRs and fewer than 2% surpass 90 PRs.
 
@@ -70,7 +62,7 @@ Also, an important insight was observed:
 
 **It was seen that beautiful, elegant code that breaks public API gets rejected faster than ugly, consistent code. Maintainers optimize for codebase coherence over local perfection.**
 
-## Featured Contributions and Recognition
+## Featured Contributions and Recognition {#featured-contributions-and-recognition}
 
 The following PRs represent different dimensions of software engineering: DevOps, API design, documentation enhancement and developer tooling:
 
@@ -129,7 +121,7 @@ The following PRs represent different dimensions of software engineering: DevOps
 
 **Outcome:** Users can now apply uniform callback patterns across these pipelines, enabling greater control and a consistent API experience.
 
-## Good Practices While Contributing
+## Good Practices While Contributing {#good-practices-while-contributing}
 
 When contributing to open-source projects works best when contributors follow conventions that reduce friction for maintainers and keep review cycles predictable. This also assumes strong working knowledge of git, which is essential for branching, rebasing, resolving conflicts and maintaining a clean commit history.
 
@@ -179,7 +171,7 @@ Across the data, **PRs with a response time under 48 hours merged 4.2 days faste
 
 It is also worth noting that maintainers may occasionally miss a PR due to workload or notification overload. A polite follow-up, usually after a few days is not only appropriate but often necessary to bring the PR back into the review cycle.
 
-## Reflections for Future Contributions
+## Reflections for Future Contributions {#reflections-for-future-contributions}
 
 The real lesson from 95 PRs isn’t about productivity, it's about understanding the needs of project maintainers, resolving long-standing issues that require attention and pursuing effective communication. At scale, open-source contribution becomes a feedback loop. You learn project-specific patterns. This leads to internalize quality signals and leads to increase in merged rates and iteration cycles decrease. It also leading to compounding of trust and access to interesting problems. 
 

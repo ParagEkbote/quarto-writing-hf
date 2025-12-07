@@ -30,8 +30,6 @@ ul.task-list li input[type="checkbox"] {
 <script src="site_libs/quarto-search/fuse.min.js"></script>
 <script src="site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="./">
-<script src="site_libs/quarto-listing/list.min.js"></script>
-<script src="site_libs/quarto-listing/quarto-listing.js"></script>
 <script src="site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="site_libs/quarto-html/axe/axe-check.js" type="module"></script>
@@ -70,68 +68,10 @@ ul.task-list li input[type="checkbox"] {
     "search-label": "Search"
   }
 }</script>
-<script>
 
-  window.document.addEventListener("DOMContentLoaded", function (_event) {
-    const listingTargetEl = window.document.querySelector('#listing-listing .list');
-    if (!listingTargetEl) {
-      // No listing discovered, do not attach.
-      return; 
-    }
-
-    const options = {
-      valueNames: ['listing-categories',{ data: ['index'] },{ data: ['categories'] },{ data: ['listing-date-sort'] },{ data: ['listing-file-modified-sort'] }],
-      
-      searchColumns: ["listing-categories"],
-    };
-
-    window['quarto-listings'] = window['quarto-listings'] || {};
-    window['quarto-listings']['listing-listing'] = new List('listing-listing', options);
-
-    if (window['quarto-listing-loaded']) {
-      window['quarto-listing-loaded']();
-    }
-  });
-
-  window.addEventListener('hashchange',() => {
-    if (window['quarto-listing-loaded']) {
-      window['quarto-listing-loaded']();
-    }
-  })
-  </script>
-
-  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
-  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
-
-<script type="text/javascript">
-const typesetMath = (el) => {
-  if (window.MathJax) {
-    // MathJax Typeset
-    window.MathJax.typeset([el]);
-  } else if (window.katex) {
-    // KaTeX Render
-    var mathElements = el.getElementsByClassName("math");
-    var macros = [];
-    for (var i = 0; i < mathElements.length; i++) {
-      var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
-        window.katex.render(texText.data, mathElements[i], {
-          displayMode: mathElements[i].classList.contains('display'),
-          throwOnError: false,
-          macros: macros,
-          fleqn: false
-        });
-      }
-    }
-  }
-}
-window.Quarto = {
-  typesetMath
-};
-</script>
 
 <link rel="stylesheet" href="styles.css">
-<link rel="alternate" type="application/rss+xml" title="What 90+ Open-Source PRs Taught Me About Software Quality and Engineering at Scale" href="index.xml" data-external="1"></head>
+</head>
 
 <body class="nav-sidebar docked quarto-light">
 
@@ -195,20 +135,35 @@ window.Quarto = {
       </div>
       <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
- <span class="menu-text">Turning PRs into Data</span>
-  </li>
+  <div class="sidebar-item-container"> 
+  <a href="./index.html#turning-prs-into-data" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Turning PRs into Data</span></a>
+  </div>
+</li>
           <li class="sidebar-item">
- <span class="menu-text">Why Contributing at Scale Matters in Open Source</span>
-  </li>
+  <div class="sidebar-item-container"> 
+  <a href="./index.html#why-contributing-at-scale-matters-in-open-source" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Why Contributing at Scale Matters in Open Source</span></a>
+  </div>
+</li>
           <li class="sidebar-item">
- <span class="menu-text">Featured Contributions and Recognition</span>
-  </li>
+  <div class="sidebar-item-container"> 
+  <a href="./index.html#featured-contributions-and-recognition" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Featured Contributions and Recognition</span></a>
+  </div>
+</li>
           <li class="sidebar-item">
- <span class="menu-text">Good Practices While Contributing</span>
-  </li>
+  <div class="sidebar-item-container"> 
+  <a href="./index.html#good-practices-while-contributing" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Good Practices While Contributing</span></a>
+  </div>
+</li>
           <li class="sidebar-item">
- <span class="menu-text">Reflections for Future Contributions</span>
-  </li>
+  <div class="sidebar-item-container"> 
+  <a href="./index.html#reflections-for-future-contributions" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Reflections for Future Contributions</span></a>
+  </div>
+</li>
       </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
@@ -245,7 +200,7 @@ window.Quarto = {
   <li><a href="#reflections-for-future-contributions" id="toc-reflections-for-future-contributions" class="nav-link" data-scroll-target="#reflections-for-future-contributions">Reflections for Future Contributions</a></li>
   </ul>
 </nav>
-    <h5 class="quarto-listing-category-title">Categories</h5><div class="quarto-listing-category category-default"><div class="category" data-category="">All <span class="quarto-category-count">(0)</span></div></div></div>
+    </div>
 <!-- main -->
 <main class="content quarto-banner-title-block column-body" id="quarto-document-content">
 
@@ -428,15 +383,9 @@ window.Quarto = {
 <p>The <a href="https://github.com/ParagEkbote/ParagEkbote.github.io/tree/main/scripts">scripts</a> used for data collection are available for reference and PR links are also included.</p>
 
 
-
 </section>
 
-<div class="quarto-listing quarto-listing-container-default" id="listing-listing">
-<div class="list quarto-listing-default">
-
-</div>
-<div class="listing-no-matching d-none">No matching items</div>
-</div></main> <!-- /main -->
+</main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     const icon = "";
