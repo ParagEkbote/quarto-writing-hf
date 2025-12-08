@@ -1,0 +1,209 @@
+/* ===========================
+   ROOT / THEME VARIABLES
+   =========================== */
+
+:root {
+  --brand-color: #005bbb;
+  --accent-color: #1e88e5;
+  --heading-color: #1a1a1a;
+  --text-color: #222;
+  --bg-color: #ffffff;
+  --sidebar-bg: #f5f7fa;
+  --border-color: #e3e6eb;
+  --code-bg: #f6f8fa;
+  --code-border: #dcdfe3;
+}
+
+/* ===========================
+   GLOBAL TYPOGRAPHY
+   =========================== */
+
+body {
+  font-family: "Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: var(--text-color);
+  background-color: var(--bg-color);
+  line-height: 1.6;
+}
+
+/* Improve headings spacing */
+h1, h2, h3, h4 {
+  font-weight: 600;
+  color: var(--heading-color);
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+}
+
+/* Highlight section titles */
+h2::after, h3::after {
+  content: "";
+  display: block;
+  width: 48px;
+  height: 3px;
+  background: var(--brand-color);
+  margin-top: 6px;
+}
+
+/* ===========================
+   SIDEBAR STYLING
+   =========================== */
+
+.sidebar {
+  background: var(--sidebar-bg) !important;
+  border-right: 1px solid var(--border-color);
+}
+
+.sidebar nav a {
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.sidebar .active > a {
+  color: var(--brand-color) !important;
+}
+
+/* ===========================
+   CODE & BLOCKS
+   =========================== */
+
+pre, code {
+  background: var(--code-bg);
+  border: 1px solid var(--code-border);
+  border-radius: 6px;
+}
+
+/* Larger code font for readability */
+code {
+  font-size: 0.9rem;
+  padding: 2px 4px;
+}
+
+pre {
+  padding: 10px;
+  font-size: 0.9rem;
+  overflow-x: auto;
+}
+
+/* Code block titles (Quarto callouts) */
+figure > pre {
+  border-left: 4px solid var(--brand-color);
+}
+
+/* ===========================
+   TABLES
+   =========================== */
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1.5rem 0;
+  font-size: 0.95rem;
+}
+
+table th {
+  background: var(--sidebar-bg);
+  font-weight: 600;
+}
+
+table th, table td {
+  border: 1px solid var(--border-color);
+  padding: 8px 10px;
+}
+
+/* ===========================
+   CALLOUTS (notes, warnings, tips)
+   =========================== */
+
+.callout-note {
+  border-left: 5px solid var(--brand-color);
+  background: #eef5ff;
+}
+
+.callout-warning {
+  border-left: 5px solid #e63946;
+  background: #fdecea;
+}
+
+/* ===========================
+   FIGURES & IMAGES
+   =========================== */
+
+figure {
+  margin: 2rem auto;
+  text-align: center;
+}
+
+figcaption {
+  font-size: 0.9rem;
+  color: #555;
+  margin-top: 0.4rem;
+  font-style: italic;
+}
+
+/* ===========================
+   LINKS / HOVER EFFECTS
+   =========================== */
+
+a {
+  color: var(--accent-color);
+  text-decoration: none;
+}
+a:hover {
+  color: var(--brand-color);
+  text-decoration: underline;
+}
+
+/* ===========================
+   LIST STYLING
+   =========================== */
+
+ul, ol {
+  margin-left: 1.25rem;
+  padding-left: 0.75rem;
+}
+
+/* ===========================
+   RESEARCH/PAPER LOOK ENHANCERS
+   =========================== */
+
+blockquote {
+  border-left: 4px solid var(--brand-color);
+  padding: 8px 12px;
+  background: #f6faff;
+  font-style: italic;
+  color: #555;
+}
+
+/* Card element (optional) */
+.card {
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 1rem;
+  background: white;
+  margin-bottom: 1rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+}
+
+/* ===========================
+   FOOTER
+   =========================== */
+
+footer {
+  border-top: 1px solid var(--border-color);
+  margin-top: 3rem;
+  padding: 1rem 0;
+  color: #666;
+  font-size: 0.85rem;
+}
+
+/* ===========================
+   RESPONSIVE ADJUSTMENTS
+   =========================== */
+
+@media (max-width: 768px) {
+  h2::after, h3::after {
+    width: 32px;
+  }
+  pre {
+    font-size: 0.85rem;
+  }
+}

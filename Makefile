@@ -1,6 +1,6 @@
 ROOT := $(CURDIR)
 SUBMODULE_DIRS := $(shell git config --file .gitmodules --get-regexp path | awk '{print $$2}')
-QUARTO_PROJECTS := $(foreach dir,$(SUBMODULE_DIRS),$(dir)/src)
+QUARTO_PROJECTS := $(foreach dir,$(CURDIR),$(dir)/src)
 GIT ?= git
 QUARTO_VERSION ?= 1.8.26
 QUARTO_HOME := $(HOME)/.local/quarto

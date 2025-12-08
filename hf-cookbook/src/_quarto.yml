@@ -1,0 +1,45 @@
+project:
+  type: website
+  output-dir: _site
+
+execute:
+  enabled: false   # stop long training / optimization from running during render/preview
+
+website:
+  title: "What 90+ Open-Source PRs Taught Me About Software Quality and Engineering at Scale"
+
+  sidebar:
+    style: docked
+    search: true
+    collapse-level: 3
+    contents:
+      - section: "Case Study"
+        contents:
+          - text: "Turning PRs into Data"
+            href: index.qmd#turning-prs-into-data
+          - text: "Transformer HPO with Optuna"
+            href: notebooks/optuna_transformers_hpo.qmd
+          - text: "Why Contributing at Scale Matters"
+            href: index.qmd#why-contributing-at-scale-matters-in-open-source
+          - text: "Featured Contributions & Recognition"
+            href: index.qmd#featured-contributions-and-recognition
+          - text: "Good Practices While Contributing"
+            href: index.qmd#good-practices-while-contributing
+          - text: "Reflections for Future Contributions"
+            href: index.qmd#reflections-for-future-contributions
+
+      - section: "About"
+        contents:
+          - text: "About"
+            href: about.qmd
+
+format:
+  html:
+    theme: cosmo
+    css: styles.css
+    toc: true
+    toc-depth: 3
+    code-fold: false
+    code-tools: true
+
+jupyter: python3

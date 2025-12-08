@@ -32,7 +32,7 @@ For detailed guidance on hyperparameter search with Transformers, refer to the [
 
 ```{python}
 #| output: false
-!pip install -q datasets evaluate transformers optuna torch wandb scikit-learn matplotlib nbclient ipykernel
+!pip install -q datasets evaluate transformers[torch] optuna wandb scikit-learn matplotlib 
 ```
 
 ## Prepare Dataset and Model
