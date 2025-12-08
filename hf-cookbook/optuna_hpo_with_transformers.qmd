@@ -1,0 +1,338 @@
+---
+title: "Hyperparameter Optimization with Optuna and Transformers"
+author: "Parag Ekbote"
+format:
+  html:
+    code-fold: false
+    code-tools: true
+    toc: true
+    toc-depth: 3
+jupyter: python3
+---
+
+## Problem
+
+Find the best hyperparameters to fine-tune a lightweight BERT model for text classification on a subset of the IMDB dataset.
+
+## Overview
+
+This recipe demonstrates how to systematically optimize hyperparameters for transformer-based text classification models using automated search techniques. You'll learn to implement hyperparameter optimization (HPO) using Optuna to find optimal learning rates and weight decay values for fine-tuning BERT on sentiment analysis tasks.
+
+## When to Use This Recipe
+
+- You need to fine-tune pre-trained language models for classification tasks
+- Your model performance is plateauing and requires parameter refinement
+- You want to implement systematic, reproducible hyperparameter optimization
+
+::: {.callout-note}
+For detailed guidance on hyperparameter search with Transformers, refer to the [Hugging Face HPO documentation](https://huggingface.co/docs/transformers/en/hpo_train).
+:::
+
+## Setup and Installation
+
+```{python}
+#| output: false
+!pip install -q datasets evaluate transformers optuna torch wandb scikit-learn matplotlib nbclient ipykernel
+```
+
+## Prepare Dataset and Model
+
+Before training and evaluating a sentiment analysis model, prepare the dataset and initialize the model architecture.
+
+### Load and Preprocess Data
+
+```{python}
+from datasets import load_dataset
+import evaluate
+from transformers import (
+    AutoModelForSequenceClassification,
+    AutoTokenizer,
+    set_seed
+)
+
+# Set seed for reproducibility
+set_seed(42)
+
+# Load IMDB dataset splits
+train_dataset = load_dataset("imdb", split="train").shuffle(seed=42).select(range(2500))
+valid_dataset = load_dataset("imdb", split="test").shuffle(seed=42).select(range(1000))
+
+# Initialize tokenizer
+model_name = "prajjwal1/bert-tiny"
+tokenizer = AutoTokenizer.from_pretrained(model_name)
+
+def tokenize(batch):
+    """Tokenize text with padding and truncation."""
+    return tokenizer(
+        batch["text"], 
+        padding="max_length", 
+        truncation=True, 
+        max_length=512
+    )
+
+# Apply tokenization
+tokenized_train = train_dataset.map(tokenize, batched=True).select_columns(
+    ["input_ids", "attention_mask", "label"]
+)
+tokenized_valid = valid_dataset.map(tokenize, batched=True).select_columns(
+    ["input_ids", "attention_mask", "label"]
+)
+
+# Load evaluation metric
+metric = evaluate.load("accuracy")
+
+def model_init():
+    """Initialize model for each trial."""
+    return AutoModelForSequenceClassification.from_pretrained(
+        model_name, 
+        num_labels=2
+    )
+```
+
+## Configure Optuna Storage
+
+Set up persistent storage to track and resume hyperparameter optimization experiments.
+
+```{python}
+import optuna
+from optuna.storages import RDBStorage
+
+# Create persistent SQLite storage
+storage = RDBStorage("sqlite:///optuna_trials.db")
+
+# Create or load existing study
+study = optuna.create_study(
+    study_name="transformers_optuna_study",
+    direction="maximize",
+    storage=storage,
+    load_if_exists=True
+)
+```
+
+## Initialize Trainer and Observability
+
+Configure the training pipeline with evaluation metrics and experiment tracking.
+
+```{python}
+import wandb
+from transformers import Trainer, TrainingArguments
+
+def compute_metrics(eval_pred):
+    """Calculate accuracy from predictions."""
+    predictions = eval_pred.predictions.argmax(axis=-1)
+    labels = eval_pred.label_ids
+    return metric.compute(predictions=predictions, references=labels)
+
+def compute_objective(metrics):
+    """Define optimization objective."""
+    return metrics["eval_accuracy"]
+
+# Initialize W&B tracking
+wandb.init(
+    project="hf-optuna", 
+    name="transformers_optuna_study"
+)
+
+# Define training configuration
+training_args = TrainingArguments(
+    output_dir="./results",
+    eval_strategy="epoch",
+    save_strategy="epoch",
+    load_best_model_at_end=True,
+    logging_strategy="epoch",
+    num_train_epochs=3,
+    report_to="wandb",
+    logging_dir="./logs",
+    run_name="transformers_optuna_study",
+)
+
+# Initialize trainer
+trainer = Trainer(
+    model_init=model_init,
+    args=training_args,
+    train_dataset=tokenized_train,
+    eval_dataset=tokenized_valid,
+    processing_class=tokenizer,
+    compute_metrics=compute_metrics,
+)
+```
+
+## Run Hyperparameter Search
+
+Define the search space and execute optimization trials.
+
+```{python}
+def optuna_hp_space(trial):
+    """Define hyperparameter search space."""
+    return {
+        "learning_rate": trial.suggest_float("learning_rate", 1e-6, 1e-4, log=True),
+        "per_device_train_batch_size": trial.suggest_categorical(
+            "per_device_train_batch_size", [16, 32, 64, 128]
+        ),
+        "weight_decay": trial.suggest_float("weight_decay", 0.0, 0.3),
+    }
+
+# Execute hyperparameter search
+best_run = trainer.hyperparameter_search(
+    direction="maximize",
+    backend="optuna",
+    hp_space=optuna_hp_space,
+    n_trials=5,
+    compute_objective=compute_objective,
+    study_name="transformers_optuna_study",
+    storage="sqlite:///optuna_trials.db",
+    load_if_exists=True
+)
+
+print("Best hyperparameters:", best_run)
+```
+
+## Visualize Optimization Results
+
+Analyze trial performance and hyperparameter importance.
+
+```{python}
+#| label: fig-optimization
+#| fig-cap: "Optuna optimization visualizations"
+#| fig-subcap:
+#|   - "Optimization history across trials"
+#|   - "Intermediate training values"
+#|   - "Hyperparameter importance rankings"
+#| layout-ncol: 1
+
+from optuna.visualization.matplotlib import (
+    plot_optimization_history,
+    plot_intermediate_values,
+    plot_param_importances
+)
+import matplotlib.pyplot as plt
+
+# Load study from storage
+study = optuna.load_study(
+    study_name="transformers_optuna_study",
+    storage=storage
+)
+
+# Plot and save optimization history
+fig1 = plot_optimization_history(study)
+plt.tight_layout()
+plt.savefig("optimization_history.png", dpi=300, bbox_inches="tight")
+plt.show()
+
+# Plot intermediate values
+fig2 = plot_intermediate_values(study)
+plt.tight_layout()
+plt.savefig("intermediate_values.png", dpi=300, bbox_inches="tight")
+plt.show()
+
+# Plot parameter importances
+fig3 = plot_param_importances(study)
+plt.tight_layout()
+plt.savefig("param_importances.png", dpi=300, bbox_inches="tight")
+plt.show()
+```
+
+## Final Training with Best Hyperparameters
+
+Train the final model using optimized hyperparameters.
+
+```{python}
+from transformers import AutoModelForSequenceClassification, TrainingArguments, Trainer
+
+# Extract best hyperparameters
+best_hparams = best_run.hyperparameters
+
+# Prepare full dataset
+full_train = load_dataset("imdb", split="train").shuffle(seed=42).select(range(2000))
+full_valid = load_dataset("imdb", split="test").shuffle(seed=42).select(range(500))
+
+# Tokenize
+tokenized_full_train = full_train.map(tokenize, batched=True).select_columns(
+    ["input_ids", "attention_mask", "label"]
+)
+tokenized_full_valid = full_valid.map(tokenize, batched=True).select_columns(
+    ["input_ids", "attention_mask", "label"]
+)
+
+# Initialize model with best architecture
+final_model = AutoModelForSequenceClassification.from_pretrained(
+    "bert-base-uncased", 
+    num_labels=2
+)
+
+# Configure training with best hyperparameters
+final_training_args = TrainingArguments(
+    output_dir="./final_model",
+    learning_rate=best_hparams["learning_rate"],
+    per_device_train_batch_size=best_hparams["per_device_train_batch_size"],
+    weight_decay=best_hparams["weight_decay"],    
+    eval_strategy="epoch",
+    save_strategy="epoch",
+    load_best_model_at_end=True,
+    logging_strategy="epoch",
+    num_train_epochs=3,
+    report_to="wandb",
+    run_name="final_run_with_best_hparams"
+)
+
+# Create final trainer
+final_trainer = Trainer(
+    model=final_model,
+    args=final_training_args,
+    train_dataset=tokenized_full_train,
+    eval_dataset=tokenized_full_valid,
+    processing_class=tokenizer,  
+    compute_metrics=compute_metrics
+)
+
+# Train final model
+final_trainer.train()
+
+# Save trained model
+final_trainer.save_model("./final_model")
+```
+
+## Share Model on Hugging Face Hub
+
+Upload the optimized model for public use and reproducibility.
+
+```{python}
+#| eval: false
+
+# Load final model and tokenizer
+final_model = AutoModelForSequenceClassification.from_pretrained("./final_model")
+final_tokenizer = AutoTokenizer.from_pretrained("./final_model")
+
+# Push to Hugging Face Hub
+final_model.push_to_hub("AINovice2005/bert-imdb-optuna-hpo")
+final_tokenizer.push_to_hub("AINovice2005/bert-imdb-optuna-hpo")
+```
+
+::: {.callout-tip}
+## Model Card Best Practices
+
+When uploading to the Hub, include:
+
+- Dataset details and preprocessing steps
+- Hyperparameter values from optimization
+- Evaluation metrics and benchmarks
+- Intended use cases and limitations
+:::
+
+## Summary
+
+This recipe demonstrated end-to-end hyperparameter optimization for transformer models:
+
+1. **Data preparation**: Loaded and tokenized IMDB dataset
+2. **HPO setup**: Configured Optuna with persistent storage
+3. **Search execution**: Explored learning rate, batch size, and weight decay
+4. **Analysis**: Visualized optimization progress and parameter importance
+5. **Final training**: Applied best hyperparameters for production model
+6. **Deployment**: Shared model on Hugging Face Hub
+
+### Key Takeaways
+
+- Systematic HPO improves model performance reliably
+- Persistent storage enables reproducible experiments
+- Visualization tools reveal optimization insights
+- Best hyperparameters transfer to final training effectively
