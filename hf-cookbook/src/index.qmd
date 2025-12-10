@@ -192,14 +192,6 @@ print("Best hyperparameters:", best_run)
 Analyze trial performance and hyperparameter importance.
 
 ```{python}
-#| label: fig-optimization
-#| fig-cap: "Optuna optimization visualizations"
-#| fig-subcap:
-#|   - "Optimization history across trials"
-#|   - "Intermediate training values"
-#|   - "Hyperparameter importance rankings"
-#| layout-ncol: 1
-
 from optuna.visualization.matplotlib import (
     plot_optimization_history,
     plot_intermediate_values,
@@ -231,6 +223,8 @@ plt.tight_layout()
 plt.savefig("param_importances.png", dpi=300, bbox_inches="tight")
 plt.show()
 ```
+
+We can observe in the [visualization](images/param_importances.png) that learning rate is the most important parameter to be optimized with batch size being second. Also, we can view in the [intermediate values plot](images/intermediate_values.png), trial 0 performed the best with early converge of hyperparameters. Lastly, we can view the complete history of optimization in the [history plot](images/optimization_history.png).
 
 ## Final Training with Best Hyperparameters
 

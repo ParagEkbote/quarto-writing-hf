@@ -6,7 +6,7 @@ execute:
   enabled: false   # Stop long training/optimization during render
 
 website:
-  title: "What 90+ Open-Source PRs Taught Me About Software Quality and Engineering at Scale"
+  title: "Hyperparameter Optimization with Optuna and Transformers"
 
   sidebar:
     style: docked

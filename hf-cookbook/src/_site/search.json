@@ -1,0 +1,148 @@
+[
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Hyperparameter Optimization with Optuna and Transformers",
+    "section": "",
+    "text": "Find the best hyperparameters to fine-tune a lightweight BERT model for text classification on a subset of the IMDB dataset."
+  },
+  {
+    "objectID": "index.html#problem",
+    "href": "index.html#problem",
+    "title": "Hyperparameter Optimization with Optuna and Transformers",
+    "section": "",
+    "text": "Find the best hyperparameters to fine-tune a lightweight BERT model for text classification on a subset of the IMDB dataset."
+  },
+  {
+    "objectID": "index.html#overview",
+    "href": "index.html#overview",
+    "title": "Hyperparameter Optimization with Optuna and Transformers",
+    "section": "Overview",
+    "text": "Overview\nThis recipe demonstrates how to systematically optimize hyperparameters for transformer-based text classification models using automated search techniques. You’ll learn to implement hyperparameter optimization (HPO) using Optuna to find optimal learning rates and weight decay values for fine-tuning BERT on sentiment analysis tasks."
+  },
+  {
+    "objectID": "index.html#when-to-use-this-recipe",
+    "href": "index.html#when-to-use-this-recipe",
+    "title": "Hyperparameter Optimization with Optuna and Transformers",
+    "section": "When to Use This Recipe",
+    "text": "When to Use This Recipe\n\nYou need to fine-tune pre-trained language models for classification tasks.\nYour model performance is plateauing and requires parameter refinement.\nYou want to implement systematic, reproducible hyperparameter optimization.\n\n\n\n\n\n\n\nNote\n\n\n\nFor detailed guidance on hyperparameter search with Transformers, refer to the Hugging Face HPO documentation."
+  },
+  {
+    "objectID": "index.html#setup-and-installation",
+    "href": "index.html#setup-and-installation",
+    "title": "Hyperparameter Optimization with Optuna and Transformers",
+    "section": "Setup and Installation",
+    "text": "Setup and Installation\n\n!pip install -q datasets evaluate transformers[torch] optuna wandb scikit-learn matplotlib"
+  },
+  {
+    "objectID": "index.html#prepare-dataset-and-model",
+    "href": "index.html#prepare-dataset-and-model",
+    "title": "Hyperparameter Optimization with Optuna and Transformers",
+    "section": "Prepare Dataset and Model",
+    "text": "Prepare Dataset and Model\nBefore training and evaluating a sentiment analysis model, prepare the dataset and initialize the model architecture.\n\nLoad and Preprocess Data\n\nfrom datasets import load_dataset\nimport evaluate\nfrom transformers import (\n    AutoModelForSequenceClassification,\n    AutoTokenizer,\n    set_seed\n)\n\n# Set seed for reproducibility\nset_seed(42)\n\n# Load IMDB dataset splits\ntrain_dataset = load_dataset(\"imdb\", split=\"train\").shuffle(seed=42).select(range(2500))\nvalid_dataset = load_dataset(\"imdb\", split=\"test\").shuffle(seed=42).select(range(1000))\n\n# Initialize tokenizer\nmodel_name = \"prajjwal1/bert-tiny\"\ntokenizer = AutoTokenizer.from_pretrained(model_name)\n\ndef tokenize(batch):\n    \"\"\"Tokenize text with padding and truncation.\"\"\"\n    return tokenizer(\n        batch[\"text\"], \n        padding=\"max_length\", \n        truncation=True, \n        max_length=512\n    )\n\n# Apply tokenization\ntokenized_train = train_dataset.map(tokenize, batched=True).select_columns(\n    [\"input_ids\", \"attention_mask\", \"label\"]\n)\ntokenized_valid = valid_dataset.map(tokenize, batched=True).select_columns(\n    [\"input_ids\", \"attention_mask\", \"label\"]\n)\n\n# Load evaluation metric\nmetric = evaluate.load(\"accuracy\")\n\ndef model_init():\n    \"\"\"Initialize model for each trial.\"\"\"\n    return AutoModelForSequenceClassification.from_pretrained(\n        model_name, \n        num_labels=2\n    )"
+  },
+  {
+    "objectID": "index.html#configure-optuna-storage",
+    "href": "index.html#configure-optuna-storage",
+    "title": "Hyperparameter Optimization with Optuna and Transformers",
+    "section": "Configure Optuna Storage",
+    "text": "Configure Optuna Storage\nSet up persistent storage to track and resume hyperparameter optimization experiments.\n\nimport optuna\nfrom optuna.storages import RDBStorage\n\n# Create persistent SQLite storage\nstorage = RDBStorage(\"sqlite:///optuna_trials.db\")\n\n# Create or load existing study\nstudy = optuna.create_study(\n    study_name=\"transformers_optuna_study\",\n    direction=\"maximize\",\n    storage=storage,\n    load_if_exists=True\n)"
+  },
+  {
+    "objectID": "index.html#initialize-trainer-and-observability",
+    "href": "index.html#initialize-trainer-and-observability",
+    "title": "Hyperparameter Optimization with Optuna and Transformers",
+    "section": "Initialize Trainer and Observability",
+    "text": "Initialize Trainer and Observability\nConfigure the training pipeline with evaluation metrics and experiment tracking.\n\nimport wandb\nfrom transformers import Trainer, TrainingArguments\n\ndef compute_metrics(eval_pred):\n    \"\"\"Calculate accuracy from predictions.\"\"\"\n    predictions = eval_pred.predictions.argmax(axis=-1)\n    labels = eval_pred.label_ids\n    return metric.compute(predictions=predictions, references=labels)\n\ndef compute_objective(metrics):\n    \"\"\"Define optimization objective.\"\"\"\n    return metrics[\"eval_accuracy\"]\n\n# Initialize W&B tracking\nwandb.init(\n    project=\"hf-optuna\", \n    name=\"transformers_optuna_study\"\n)\n\n# Define training configuration\ntraining_args = TrainingArguments(\n    output_dir=\"./results\",\n    eval_strategy=\"epoch\",\n    save_strategy=\"epoch\",\n    load_best_model_at_end=True,\n    logging_strategy=\"epoch\",\n    num_train_epochs=3,\n    report_to=\"wandb\",\n    logging_dir=\"./logs\",\n    run_name=\"transformers_optuna_study\",\n)\n\n# Initialize trainer\ntrainer = Trainer(\n    model_init=model_init,\n    args=training_args,\n    train_dataset=tokenized_train,\n    eval_dataset=tokenized_valid,\n    processing_class=tokenizer,\n    compute_metrics=compute_metrics,\n)"
+  },
+  {
+    "objectID": "index.html#run-hyperparameter-search",
+    "href": "index.html#run-hyperparameter-search",
+    "title": "Hyperparameter Optimization with Optuna and Transformers",
+    "section": "Run Hyperparameter Search",
+    "text": "Run Hyperparameter Search\nDefine the search space and execute optimization trials.\n\ndef optuna_hp_space(trial):\n    \"\"\"Define hyperparameter search space.\"\"\"\n    return {\n        \"learning_rate\": trial.suggest_float(\"learning_rate\", 1e-6, 1e-4, log=True),\n        \"per_device_train_batch_size\": trial.suggest_categorical(\n            \"per_device_train_batch_size\", [16, 32, 64, 128]\n        ),\n        \"weight_decay\": trial.suggest_float(\"weight_decay\", 0.0, 0.3),\n    }\n\n# Execute hyperparameter search\nbest_run = trainer.hyperparameter_search(\n    direction=\"maximize\",\n    backend=\"optuna\",\n    hp_space=optuna_hp_space,\n    n_trials=5,\n    compute_objective=compute_objective,\n    study_name=\"transformers_optuna_study\",\n    storage=\"sqlite:///optuna_trials.db\",\n    load_if_exists=True\n)\n\nprint(\"Best hyperparameters:\", best_run)"
+  },
+  {
+    "objectID": "index.html#visualize-optimization-results",
+    "href": "index.html#visualize-optimization-results",
+    "title": "Hyperparameter Optimization with Optuna and Transformers",
+    "section": "Visualize Optimization Results",
+    "text": "Visualize Optimization Results\nAnalyze trial performance and hyperparameter importance.\n\nfrom optuna.visualization.matplotlib import (\n    plot_optimization_history,\n    plot_intermediate_values,\n    plot_param_importances\n)\nimport matplotlib.pyplot as plt\n\n# Load study from storage\nstudy = optuna.load_study(\n    study_name=\"transformers_optuna_study\",\n    storage=storage\n)\n\n# Plot and save optimization history\nfig1 = plot_optimization_history(study)\nplt.tight_layout()\nplt.savefig(\"optimization_history.png\", dpi=300, bbox_inches=\"tight\")\nplt.show()\n\n# Plot intermediate values\nfig2 = plot_intermediate_values(study)\nplt.tight_layout()\nplt.savefig(\"intermediate_values.png\", dpi=300, bbox_inches=\"tight\")\nplt.show()\n\n# Plot parameter importances\nfig3 = plot_param_importances(study)\nplt.tight_layout()\nplt.savefig(\"param_importances.png\", dpi=300, bbox_inches=\"tight\")\nplt.show()\n\nWe can observe in the visualization that learning rate is the most important parameter to be optimized with batch size being second. Also, we can view in the intermediate values plot, trial 0 performed the best with early converge of hyperparameters. Lastly, we can view the complete history of optimization in the history plot."
+  },
+  {
+    "objectID": "index.html#final-training-with-best-hyperparameters",
+    "href": "index.html#final-training-with-best-hyperparameters",
+    "title": "Hyperparameter Optimization with Optuna and Transformers",
+    "section": "Final Training with Best Hyperparameters",
+    "text": "Final Training with Best Hyperparameters\nTrain the final model using optimized hyperparameters.\n\nfrom transformers import AutoModelForSequenceClassification, TrainingArguments, Trainer\n\n# Extract best hyperparameters\nbest_hparams = best_run.hyperparameters\n\n# Prepare full dataset\nfull_train = load_dataset(\"imdb\", split=\"train\").shuffle(seed=42).select(range(2000))\nfull_valid = load_dataset(\"imdb\", split=\"test\").shuffle(seed=42).select(range(500))\n\n# Tokenize\ntokenized_full_train = full_train.map(tokenize, batched=True).select_columns(\n    [\"input_ids\", \"attention_mask\", \"label\"]\n)\ntokenized_full_valid = full_valid.map(tokenize, batched=True).select_columns(\n    [\"input_ids\", \"attention_mask\", \"label\"]\n)\n\n# Initialize model with best architecture\nfinal_model = AutoModelForSequenceClassification.from_pretrained(\n    \"bert-base-uncased\", \n    num_labels=2\n)\n\n# Configure training with best hyperparameters\nfinal_training_args = TrainingArguments(\n    output_dir=\"./final_model\",\n    learning_rate=best_hparams[\"learning_rate\"],\n    per_device_train_batch_size=best_hparams[\"per_device_train_batch_size\"],\n    weight_decay=best_hparams[\"weight_decay\"],    \n    eval_strategy=\"epoch\",\n    save_strategy=\"epoch\",\n    load_best_model_at_end=True,\n    logging_strategy=\"epoch\",\n    num_train_epochs=3,\n    report_to=\"wandb\",\n    run_name=\"final_run_with_best_hparams\"\n)\n\n# Create final trainer\nfinal_trainer = Trainer(\n    model=final_model,\n    args=final_training_args,\n    train_dataset=tokenized_full_train,\n    eval_dataset=tokenized_full_valid,\n    processing_class=tokenizer,  \n    compute_metrics=compute_metrics\n)\n\n# Train final model\nfinal_trainer.train()\n\n# Save trained model\nfinal_trainer.save_model(\"./final_model\")"
+  },
+  {
+    "objectID": "index.html#share-model-on-hugging-face-hub",
+    "href": "index.html#share-model-on-hugging-face-hub",
+    "title": "Hyperparameter Optimization with Optuna and Transformers",
+    "section": "Share Model on Hugging Face Hub",
+    "text": "Share Model on Hugging Face Hub\nUpload the optimized model for public use and reproducibility.\n\n# Load final model and tokenizer\nfinal_model = AutoModelForSequenceClassification.from_pretrained(\"./final_model\")\nfinal_tokenizer = AutoTokenizer.from_pretrained(\"./final_model\")\n\n# Push to Hugging Face Hub\nfinal_model.push_to_hub(\"AINovice2005/bert-imdb-optuna-hpo\")\nfinal_tokenizer.push_to_hub(\"AINovice2005/bert-imdb-optuna-hpo\")\n\n\n\n\n\n\n\nTipModel Card Best Practices\n\n\n\nWhen uploading to the Hub, include:\n\nDataset details and preprocessing steps\nHyperparameter values from optimization\nEvaluation metrics and benchmarks\nIntended use cases and limitations"
+  },
+  {
+    "objectID": "index.html#summary",
+    "href": "index.html#summary",
+    "title": "Hyperparameter Optimization with Optuna and Transformers",
+    "section": "Summary",
+    "text": "Summary\nThis recipe demonstrated end-to-end hyperparameter optimization for transformer models:\n\nData preparation: Loaded and tokenized IMDB dataset\nHPO setup: Configured Optuna with persistent storage\nSearch execution: Explored learning rate, batch size and weight decay\nAnalysis: Visualized optimization progress and parameter importance\nFinal training: Applied best hyperparameters for production model\nDeployment: Shared model on Hugging Face Hub\n\n\nKey Takeaways\n\nSystematic HPO improves model performance reliably.\nPersistent storage enables reproducible experiments.\nVisualization tools reveal optimization insights.\nBest hyperparameters transfer to final training effectively."
+  },
+  {
+    "objectID": "about.html",
+    "href": "about.html",
+    "title": "About This Project",
+    "section": "",
+    "text": "By building an HPO pipeline using Transformers + Optuna, you’ll learn how to:\n\ndefine meaningful search spaces\n\npersist and analyze trials\n\nvisualize optimization progress\n\ntrain with best-performing hyperparameters\n\npublish reproducible models to the Hugging Face Hub",
+    "crumbs": [
+      "About",
+      "About"
+    ]
+  },
+  {
+    "objectID": "about.html#where-to-find-the-published-cookbook",
+    "href": "about.html#where-to-find-the-published-cookbook",
+    "title": "About This Project",
+    "section": "Where to Find the Published Cookbook",
+    "text": "Where to Find the Published Cookbook\nThis space is part of a recipe published for the Hugging Face Learn Cookbook series. It has been formatted for clarity.",
+    "crumbs": [
+      "About",
+      "About"
+    ]
+  },
+  {
+    "objectID": "about.html#apply-optimization-techniques-to-models",
+    "href": "about.html#apply-optimization-techniques-to-models",
+    "title": "About This Project",
+    "section": "",
+    "text": "By building an HPO pipeline using Transformers + Optuna, you’ll learn how to:\n\ndefine meaningful search spaces\n\npersist and analyze trials\n\nvisualize optimization progress\n\ntrain with best-performing hyperparameters\n\npublish reproducible models to the Hugging Face Hub",
+    "crumbs": [
+      "About",
+      "About"
+    ]
+  },
+  {
+    "objectID": "about.html#mot",
+    "href": "about.html#mot",
+    "title": "About This Project",
+    "section": "",
+    "text": "By building an HPO pipeline using Transformers + Optuna, you’ll learn how to:\n\ndefine meaningful search spaces\n\npersist and analyze trials\n\nvisualize optimization progress\n\ntrain with best-performing hyperparameters\n\npublish reproducible models to the Hugging Face Hub",
+    "crumbs": [
+      "About",
+      "About"
+    ]
+  },
+  {
+    "objectID": "about.html#motivation",
+    "href": "about.html#motivation",
+    "title": "About This Project",
+    "section": "",
+    "text": "By building an HPO pipeline using Transformers + Optuna, you’ll learn how to:\n\ndefine meaningful search spaces\n\npersist and analyze trials\n\nvisualize optimization progress\n\ntrain with best-performing hyperparameters\n\npublish reproducible models to the Hugging Face Hub",
+    "crumbs": [
+      "About",
+      "About"
+    ]
+  }
+]
