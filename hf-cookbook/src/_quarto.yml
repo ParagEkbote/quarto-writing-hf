@@ -3,7 +3,7 @@ project:
   output-dir: _site
 
 execute:
-  enabled: false   # stop long training / optimization from running during render/preview
+  enabled: false   # Stop long training/optimization during render
 
 website:
   title: "What 90+ Open-Source PRs Taught Me About Software Quality and Engineering at Scale"
@@ -18,15 +18,21 @@ website:
           - text: "Turning PRs into Data"
             href: index.qmd#turning-prs-into-data
           - text: "Transformer HPO with Optuna"
-            href: notebooks/optuna_transformers_hpo.qmd
-          - text: "Why Contributing at Scale Matters"
-            href: index.qmd#why-contributing-at-scale-matters-in-open-source
-          - text: "Featured Contributions & Recognition"
-            href: index.qmd#featured-contributions-and-recognition
-          - text: "Good Practices While Contributing"
-            href: index.qmd#good-practices-while-contributing
-          - text: "Reflections for Future Contributions"
-            href: index.qmd#reflections-for-future-contributions
+            href: index.qmd#hyperparameter-optimization-with-optuna-and-transformers
+          - text: "Configure Optuna Storage"
+            href: index.qmd#define-storage-with-optuna
+          - text: "Initialize Trainer and Observability"
+            href: index.qmd#initialize-trainer-and-set-up-observability
+          - text: "Run Hyperparameter Search"
+            href: index.qmd#define-search-space-and-start-trials
+          - text: "Visualize Optimization Results"
+            href: index.qmd#visualize-results
+          - text: "Final Training with Best Hyperparameters"
+            href: index.qmd#perform-final-training
+          - text: "Share Model on Hugging Face Hub"
+            href: index.qmd#uploading-to-hugging-face-hub
+          - text: "Summary"
+            href: index.qmd#summary
 
       - section: "About"
         contents:
@@ -41,5 +47,3 @@ format:
     toc-depth: 3
     code-fold: false
     code-tools: true
-
-jupyter: python3

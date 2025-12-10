@@ -1,0 +1,20 @@
+---
+title: "About This Project"
+format:
+  html:
+    toc: false
+---
+
+
+### Apply Optimization Techniques to Models  
+Through an HPO pipeline using Transformers + Optuna, you’ll learn how to:
+
+- define meaningful search spaces  
+- persist and analyze trials  
+- visualize optimization progress  
+- train with best-performing hyperparameters  
+- publish reproducible models to the Hugging Face Hub  
+
+## Where to Find the Published Cookbook
+
+This space is part of a recipe published for the [Hugging Face Learn Cookbook](https://huggingface.co/learn/cookbook/en/optuna_hpo_with_transformers) series. It has been polished and formatted for clarity.

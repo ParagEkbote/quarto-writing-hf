@@ -20,9 +20,9 @@ This recipe demonstrates how to systematically optimize hyperparameters for tran
 
 ## When to Use This Recipe
 
-- You need to fine-tune pre-trained language models for classification tasks
-- Your model performance is plateauing and requires parameter refinement
-- You want to implement systematic, reproducible hyperparameter optimization
+- You need to fine-tune pre-trained language models for classification tasks.
+- Your model performance is plateauing and requires parameter refinement.
+- You want to implement systematic, reproducible hyperparameter optimization.
 
 ::: {.callout-note}
 For detailed guidance on hyperparameter search with Transformers, refer to the [Hugging Face HPO documentation](https://huggingface.co/docs/transformers/en/hpo_train).
@@ -325,14 +325,14 @@ This recipe demonstrated end-to-end hyperparameter optimization for transformer 
 
 1. **Data preparation**: Loaded and tokenized IMDB dataset
 2. **HPO setup**: Configured Optuna with persistent storage
-3. **Search execution**: Explored learning rate, batch size, and weight decay
+3. **Search execution**: Explored learning rate, batch size and weight decay
 4. **Analysis**: Visualized optimization progress and parameter importance
 5. **Final training**: Applied best hyperparameters for production model
 6. **Deployment**: Shared model on Hugging Face Hub
 
 ### Key Takeaways
 
-- Systematic HPO improves model performance reliably
-- Persistent storage enables reproducible experiments
-- Visualization tools reveal optimization insights
-- Best hyperparameters transfer to final training effectively
+- Systematic HPO improves model performance reliably.
+- Persistent storage enables reproducible experiments.
+- Visualization tools reveal optimization insights.
+- Best hyperparameters transfer to final training effectively.
